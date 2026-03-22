@@ -2,16 +2,16 @@
 
 OpenILink 已经在多个运行时上展开 SDK 布局。当前组织下共有 6 个 SDK 仓库，覆盖 Node.js、PHP、Go、Python、C# 与 Java。它们的成熟度并不完全一致，但已经构成了统一的入口矩阵。
 
-## 可用包
+## SDK 列表
 
-| 运行时 | 包名 | 仓库 | 当前说明 |
-| --- | --- | --- |
-| Node.js | `openilink-sdk-node` | [openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node) | 已有独立页面 |
-| PHP | `openilink/openilink-sdk-php` | [openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php) | 已有独立页面 |
-| Go | `openilink-sdk-go` | [openilink/openilink-sdk-go](https://github.com/openilink/openilink-sdk-go) | 已收录概览 |
-| Python | `openilink-sdk-python` | [openilink/openilink-sdk-python](https://github.com/openilink/openilink-sdk-python) | 已收录概览 |
-| C# | `openilink-sdk-csharp` | [openilink/openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp) | 已收录概览 |
-| Java | `openilink-sdk-java` | [openilink/openilink-sdk-java](https://github.com/openilink/openilink-sdk-java) | 新增收录 |
+| 运行时 | 仓库 | 文档状态 | 备注 |
+| --- | --- | --- | --- |
+| Node.js | [openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node) | 已有独立页面 | npm 包名为 `openilink-sdk-node` |
+| PHP | [openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php) | 已有独立页面 | Composer 包名为 `openilink/openilink-sdk-php` |
+| Go | [openilink/openilink-sdk-go](https://github.com/openilink/openilink-sdk-go) | 已有独立入口 | 当前站点收录概览页 |
+| Python | [openilink/openilink-sdk-python](https://github.com/openilink/openilink-sdk-python) | 已有独立入口 | 当前站点收录概览页 |
+| C# | [openilink/openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp) | 已有独立入口 | 当前站点收录概览页 |
+| Java | [openilink/openilink-sdk-java](https://github.com/openilink/openilink-sdk-java) | 已有独立入口 | 当前站点收录概览页 |
 
 ## 共同能力
 
