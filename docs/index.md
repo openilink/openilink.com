@@ -6,7 +6,7 @@ hero:
   text: 面向会话系统的开放连接层
   tagline: 为机器人、智能体与消息驱动产品提供统一接入面。OpenILink 当前公开 10 个仓库，覆盖官网、Hub、中枢与渠道集成，以及 6 个官方 SDK。
   image:
-    src: /mark.svg
+    src: /openilink.svg
     alt: OpenILink
   actions:
     - theme: brand

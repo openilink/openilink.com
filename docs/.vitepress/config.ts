@@ -4,7 +4,7 @@ export default defineConfig({
   lang: "zh-CN",
   title: "OpenILink",
   description: "OpenILink 官方网站与文档中心。",
-  head: [["link", { rel: "icon", href: "/mark.svg" }]],
+  head: [["link", { rel: "icon", href: "/openilink.svg" }]],
   base: "/",
   cleanUrls: true,
   lastUpdated: true,
@@ -13,7 +13,7 @@ export default defineConfig({
     hostname: "https://openilink.com"
   },
   themeConfig: {
-    logo: "/mark.svg",
+    logo: "/openilink.svg",
     nav: [
       { text: "Hub", link: "https://hub.openilink.com" },
       { text: "指南", link: "/guide/" },
