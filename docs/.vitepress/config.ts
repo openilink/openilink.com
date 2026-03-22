@@ -46,7 +46,11 @@ export default defineConfig({
           items: [
             { text: "总览", link: "/sdk/" },
             { text: "Node.js SDK", link: "/sdk/node" },
-            { text: "PHP SDK", link: "/sdk/php" }
+            { text: "PHP SDK", link: "/sdk/php" },
+            { text: "Go SDK", link: "/sdk/go" },
+            { text: "Python SDK", link: "/sdk/python" },
+            { text: "C# SDK", link: "/sdk/csharp" },
+            { text: "Java SDK", link: "/sdk/java" }
           ]
         }
       ]

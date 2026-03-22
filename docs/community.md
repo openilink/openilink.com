@@ -1,6 +1,6 @@
 # 社区
 
-OpenILink 通过公开仓库和公开文档持续构建。
+OpenILink 通过公开仓库和公开文档持续构建。截至当前同步点，`openilink` 组织共有 9 个公开仓库，其中 6 个属于 SDK 线路。
 
 ## 仓库
 
@@ -12,6 +12,7 @@ OpenILink 通过公开仓库和公开文档持续构建。
 - [openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php)
 - [openilink/openilink-sdk-python](https://github.com/openilink/openilink-sdk-python)
 - [openilink/openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp)
+- [openilink/openilink-sdk-java](https://github.com/openilink/openilink-sdk-java)
 
 完整列表与分类说明见 [仓库页](/repositories)。
 
@@ -23,6 +24,7 @@ OpenILink 通过公开仓库和公开文档持续构建。
 - 贡献示例和集成配方
 - 报告 SDK 问题
 - 提出运行时相关改进建议
+- 协助补齐多语言 SDK 的一致性
 
 ## 站点角色
 

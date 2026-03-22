@@ -1,6 +1,6 @@
 # 仓库
 
-下面是 `openilink` 组织当前公开的仓库列表。这个页面用于把官网、SDK 与生态项目放到同一个索引面里，避免入口分散。
+下面是 `openilink` 组织当前公开的仓库列表。这个页面用于把官网、SDK 与生态项目放到同一个索引面里，避免入口分散。当前同步到的公开仓库总数为 9 个。
 
 ## 全部仓库
 
@@ -14,14 +14,35 @@
 | [openilink/openilink-sdk-go](https://github.com/openilink/openilink-sdk-go) | SDK | Go | Go SDK |
 | [openilink/openilink-sdk-python](https://github.com/openilink/openilink-sdk-python) | SDK | Python | Python SDK |
 | [openilink/openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp) | SDK | C# | .NET / C# SDK |
+| [openilink/openilink-sdk-java](https://github.com/openilink/openilink-sdk-java) | SDK | Java | Java SDK |
 
 ## 结构理解
 
 目前可以把这些仓库理解为三层：
 
 - 官网层：`openilink.com`
-- SDK 层：不同运行时的接入包
+- SDK 层：6 个不同运行时的接入包
 - 生态 / 中枢层：`openilink-hub`、`openilink-tg`
+
+## 按类别看
+
+### 官网
+
+- `openilink.com`
+
+### SDK
+
+- `openilink-sdk-node`
+- `openilink-sdk-php`
+- `openilink-sdk-go`
+- `openilink-sdk-python`
+- `openilink-sdk-csharp`
+- `openilink-sdk-java`
+
+### 平台与生态
+
+- `openilink-hub`
+- `openilink-tg`
 
 ## 使用建议
 
