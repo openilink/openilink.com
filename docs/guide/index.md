@@ -1,35 +1,35 @@
-# Guide
+# 指南
 
-OpenILink is organized as a small ecosystem instead of a single monolith. The website acts as the front door, while the SDK repositories focus on implementation details for each runtime.
+OpenILink 更像一个小型生态，而不是单一仓库。官网负责解释整体结构和入口关系，SDK 仓库则分别承担不同运行时的实现细节。
 
-## Core Model
+## 核心模型
 
-At the center is a bot-oriented workflow:
+中心链路围绕 bot 接入展开：
 
-1. Authenticate and establish a usable session.
-2. Receive inbound messages through long polling.
-3. Respond with outbound messages and status updates.
-4. Cache context tokens for proactive follow-up.
-5. Layer additional tooling on top of the same transport primitives.
+1. 完成认证并建立可用会话。
+2. 通过长轮询接收入站消息。
+3. 发出响应消息与状态更新。
+4. 缓存 context token 以支持主动触达。
+5. 在同一套传输原语之上继续叠加更高层能力。
 
-## Site Structure
+## 站点结构
 
-This site is intentionally split into a few clear sections:
+站点被刻意拆成几个明确区域：
 
-- `/guide/` for concepts and orientation
-- `/sdk/` for runtime packages
-- `/roadmap` for forward-looking direction
-- `/community` for repositories and collaboration paths
+- `/guide/` 放概念与方向
+- `/sdk/` 放运行时包与接入入口
+- `/roadmap` 放后续方向
+- `/community` 放仓库和协作方式
 
-## Implementation Philosophy
+## 实现原则
 
-OpenILink favors a narrow starting surface:
+OpenILink 偏向保持窄而清晰的起始面：
 
-- Keep SDK APIs aligned across languages.
-- Prefer obvious request and response shapes over excessive abstraction.
-- Ship examples that map directly to real usage.
-- Make documentation easy to extend as the ecosystem grows.
+- 不同语言 SDK 尽量保持方法和流程对齐。
+- 请求和响应形态优先保持直白，而不是过度抽象。
+- 示例要能直接映射到真实使用场景。
+- 文档结构要便于随着生态增长持续扩展。
 
-## Next Step
+## 下一步
 
-If you want to start coding, go straight to [SDK Overview](/sdk/).
+如果你要开始接入，直接进入 [SDK 总览](/sdk/)。

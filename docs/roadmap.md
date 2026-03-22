@@ -1,21 +1,21 @@
-# Roadmap
+# 路线图
 
-OpenILink is being shaped as a compact but extensible ecosystem.
+OpenILink 的目标不是做成过重的平台，而是做成一个紧凑但可扩展的生态表面。
 
-## Near-Term Priorities
+## 近期重点
 
-- Stabilize the official SDK interfaces across runtimes
-- Expand examples and quickstart coverage
-- Add clearer operational guidance for deployment and hosting
-- Improve documentation depth around message and session flows
+- 稳定不同运行时之间的官方 SDK 接口
+- 扩展示例与快速开始覆盖面
+- 补充更清晰的部署与运维说明
+- 加深消息与会话链路相关文档
 
-## Next Expansion Areas
+## 下一阶段扩展
 
-- API reference sections
-- integration recipes
-- release notes and changelog pages
-- more runtime SDKs and ecosystem tooling
+- API 参考页面
+- 集成配方与最佳实践
+- 发布说明与版本变更页面
+- 更多运行时 SDK 与生态工具
 
-## Principle
+## 原则
 
-The roadmap is intentionally practical. Each addition should reduce the gap between “I understand the platform” and “I can ship against it this week.”
+路线图会保持务实。每一项新增内容都应该缩短“我理解这个平台”和“我这周就能接进去”之间的距离。

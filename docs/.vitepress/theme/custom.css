@@ -1,47 +1,48 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap");
 
 :root {
-  --vp-c-bg: #f6f0e5;
-  --vp-c-bg-alt: #efe4d2;
-  --vp-c-bg-soft: #fff8ef;
-  --vp-c-bg-elv: rgba(255, 248, 239, 0.86);
-  --vp-c-border: rgba(72, 56, 35, 0.18);
-  --vp-c-divider: rgba(72, 56, 35, 0.12);
-  --vp-c-text-1: #221a12;
-  --vp-c-text-2: rgba(34, 26, 18, 0.78);
-  --vp-c-text-3: rgba(34, 26, 18, 0.56);
-  --vp-c-brand-1: #0f7b6c;
-  --vp-c-brand-2: #0d675b;
-  --vp-c-brand-3: #125347;
-  --vp-c-brand-soft: rgba(15, 123, 108, 0.14);
-  --vp-home-hero-name-color: #221a12;
+  --vp-c-bg: #06111f;
+  --vp-c-bg-alt: #09182b;
+  --vp-c-bg-soft: #0d2039;
+  --vp-c-bg-elv: rgba(9, 24, 43, 0.8);
+  --vp-c-border: rgba(107, 193, 255, 0.14);
+  --vp-c-divider: rgba(107, 193, 255, 0.12);
+  --vp-c-text-1: #f4fbff;
+  --vp-c-text-2: rgba(223, 240, 255, 0.72);
+  --vp-c-text-3: rgba(183, 214, 240, 0.46);
+  --vp-c-brand-1: #59d0ff;
+  --vp-c-brand-2: #3cb1ff;
+  --vp-c-brand-3: #2382ff;
+  --vp-c-brand-soft: rgba(89, 208, 255, 0.16);
+  --vp-home-hero-name-color: #f7fbff;
   --vp-home-hero-image-background-image:
-    radial-gradient(circle at 18% 22%, rgba(15, 123, 108, 0.26), transparent 26%),
-    radial-gradient(circle at 82% 18%, rgba(215, 107, 49, 0.28), transparent 28%),
-    linear-gradient(135deg, #0f7b6c 0%, #d76b31 100%);
-  --vp-home-hero-image-filter: blur(64px);
-  --vp-button-brand-bg: #221a12;
-  --vp-button-brand-hover-bg: #0f7b6c;
-  --vp-button-brand-border: #221a12;
-  --vp-button-brand-hover-border: #0f7b6c;
-  --vp-button-brand-text: #fffaf3;
-  --vp-button-alt-bg: rgba(34, 26, 18, 0.06);
-  --vp-button-alt-border: rgba(34, 26, 18, 0.12);
-  --vp-button-alt-hover-bg: rgba(34, 26, 18, 0.1);
+    radial-gradient(circle at 18% 22%, rgba(33, 211, 255, 0.22), transparent 26%),
+    radial-gradient(circle at 82% 18%, rgba(50, 116, 255, 0.28), transparent 30%),
+    linear-gradient(135deg, #132b56 0%, #0a7adf 50%, #59d0ff 100%);
+  --vp-home-hero-image-filter: blur(78px);
+  --vp-button-brand-bg: #59d0ff;
+  --vp-button-brand-hover-bg: #86defd;
+  --vp-button-brand-border: #59d0ff;
+  --vp-button-brand-hover-border: #86defd;
+  --vp-button-brand-text: #041019;
+  --vp-button-alt-bg: rgba(89, 208, 255, 0.08);
+  --vp-button-alt-border: rgba(89, 208, 255, 0.2);
+  --vp-button-alt-hover-bg: rgba(89, 208, 255, 0.14);
 }
 
 html,
 body,
 .VPApp {
   background:
-    radial-gradient(circle at top left, rgba(15, 123, 108, 0.1), transparent 24%),
-    radial-gradient(circle at top right, rgba(215, 107, 49, 0.1), transparent 26%),
-    linear-gradient(180deg, #fdf8f0 0%, #f6f0e5 34%, #efe2cf 100%);
+    radial-gradient(circle at top left, rgba(89, 208, 255, 0.11), transparent 24%),
+    radial-gradient(circle at top right, rgba(35, 130, 255, 0.18), transparent 26%),
+    linear-gradient(180deg, #040a13 0%, #071120 38%, #09182b 100%);
 }
 
 body {
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   letter-spacing: 0.01em;
+  color: var(--vp-c-text-1);
 }
 
 h1,
@@ -50,13 +51,19 @@ h3,
 .title,
 .name,
 .text {
-  font-family: "Fraunces", serif;
+  font-family: "Chakra Petch", "Noto Sans SC", sans-serif;
 }
 
 .VPNavBar {
-  background: rgba(253, 248, 240, 0.7) !important;
+  background: rgba(4, 12, 24, 0.72) !important;
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(72, 56, 35, 0.08);
+  border-bottom: 1px solid rgba(89, 208, 255, 0.1);
+}
+
+.VPNavBarTitle .title,
+.VPNavBarMenuLink,
+.VPLink.link {
+  color: var(--vp-c-text-1);
 }
 
 .VPContent.is-home {
@@ -72,16 +79,16 @@ h3,
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(34, 26, 18, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 26, 18, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.78), transparent 82%);
+    linear-gradient(rgba(89, 208, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(89, 208, 255, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 82%);
   pointer-events: none;
 }
 
 .VPHomeHero {
-  padding-top: 56px !important;
-  padding-bottom: 48px !important;
+  padding-top: 72px !important;
+  padding-bottom: 30px !important;
 }
 
 .VPHomeHero .container {
@@ -89,50 +96,56 @@ h3,
 }
 
 .VPHomeHero .main {
-  max-width: 720px;
+  max-width: 760px;
 }
 
 .VPHomeHero .name {
-  font-size: clamp(3.6rem, 10vw, 6.5rem);
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  font-size: clamp(4rem, 10vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
 }
 
 .VPHomeHero .text {
-  font-size: clamp(1.25rem, 2.4vw, 2rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: rgba(34, 26, 18, 0.8);
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: rgba(239, 249, 255, 0.95);
 }
 
 .VPHomeHero .tagline {
   max-width: 620px;
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: rgba(34, 26, 18, 0.72);
+  font-size: 1.02rem;
+  line-height: 1.92;
+  color: rgba(213, 236, 255, 0.76);
 }
 
 .VPHomeHero .image {
-  transform: rotate(2deg);
+  transform: translateY(10px) rotate(-6deg);
 }
 
 .VPImage.image-src {
-  border-radius: 30px;
-  border: 1px solid rgba(72, 56, 35, 0.15);
+  border-radius: 28px;
+  border: 1px solid rgba(89, 208, 255, 0.18);
   box-shadow:
-    0 28px 80px rgba(17, 13, 9, 0.18),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+    0 28px 80px rgba(6, 16, 31, 0.5),
+    0 0 80px rgba(52, 171, 255, 0.18),
+    inset 0 0 0 1px rgba(189, 236, 255, 0.12);
+  background: linear-gradient(180deg, rgba(14, 34, 56, 0.92), rgba(8, 20, 37, 0.92));
 }
 
 .VPFeatures {
-  padding-top: 18px !important;
-  padding-bottom: 72px !important;
+  padding-top: 24px !important;
+  padding-bottom: 56px !important;
 }
 
 .VPFeature {
-  border: 1px solid rgba(72, 56, 35, 0.14);
-  background: linear-gradient(180deg, rgba(255, 250, 243, 0.88), rgba(250, 241, 227, 0.96));
-  box-shadow: 0 18px 40px rgba(29, 22, 14, 0.08);
+  border: 1px solid rgba(89, 208, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(10, 25, 46, 0.92), rgba(6, 17, 31, 0.95)),
+    radial-gradient(circle at top right, rgba(89, 208, 255, 0.12), transparent 30%);
+  box-shadow: 0 20px 44px rgba(3, 9, 18, 0.34);
   min-height: 100%;
 }
 
@@ -154,22 +167,116 @@ h3,
 .vp-doc h2,
 .vp-doc h3 {
   letter-spacing: -0.03em;
+  color: var(--vp-c-text-1);
 }
 
 .vp-doc table {
   display: table;
   width: 100%;
   border-collapse: collapse;
-  background: rgba(255, 249, 241, 0.76);
+  background: rgba(9, 24, 43, 0.7);
 }
 
 .vp-doc tr:nth-child(2n) {
-  background: rgba(15, 123, 108, 0.04);
+  background: rgba(89, 208, 255, 0.04);
 }
 
 .custom-block {
   border-radius: 18px;
-  border: 1px solid rgba(72, 56, 35, 0.1);
+  border: 1px solid rgba(89, 208, 255, 0.12);
+  background: rgba(9, 24, 43, 0.68);
+}
+
+.home-pulse {
+  margin: 26px 0 46px;
+  padding: 28px;
+  border: 1px solid rgba(89, 208, 255, 0.14);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(7, 18, 33, 0.92), rgba(5, 13, 24, 0.98)),
+    radial-gradient(circle at top left, rgba(89, 208, 255, 0.12), transparent 28%);
+  box-shadow: 0 30px 80px rgba(2, 8, 18, 0.34);
+}
+
+.home-pulse__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(89, 208, 255, 0.16);
+  background: rgba(89, 208, 255, 0.07);
+  color: #9ee4ff;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+}
+
+.home-pulse__label::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #59d0ff;
+  box-shadow: 0 0 18px #59d0ff;
+}
+
+.home-pulse__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.home-pulse__card {
+  position: relative;
+  overflow: hidden;
+  min-height: 168px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(89, 208, 255, 0.12);
+  background: linear-gradient(180deg, rgba(12, 31, 56, 0.84), rgba(7, 18, 33, 0.95));
+}
+
+.home-pulse__card::after {
+  content: "";
+  position: absolute;
+  inset: auto -12% -56% auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(89, 208, 255, 0.24), transparent 60%);
+}
+
+.home-pulse__card span {
+  display: block;
+  color: rgba(158, 228, 255, 0.86);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+}
+
+.home-pulse__card strong {
+  display: block;
+  margin-top: 18px;
+  color: #f4fbff;
+  font-size: 1.28rem;
+  line-height: 1.25;
+}
+
+.home-pulse__card p {
+  margin: 16px 0 0;
+  color: rgba(213, 236, 255, 0.72);
+  line-height: 1.8;
+}
+
+.vp-doc blockquote {
+  border-left: 1px solid rgba(89, 208, 255, 0.3);
+  background: rgba(89, 208, 255, 0.04);
+}
+
+.VPHero.has-image .image {
+  flex: 0 0 42%;
 }
 
 @media (max-width: 960px) {
@@ -179,5 +286,9 @@ h3,
 
   .VPHomeHero .main {
     max-width: none;
+  }
+
+  .home-pulse__grid {
+    grid-template-columns: 1fr;
   }
 }

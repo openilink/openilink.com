@@ -1,25 +1,25 @@
 # Node.js SDK
 
-The Node.js SDK is intended for modern server runtimes and TypeScript-friendly workflows.
+Node.js SDK 面向现代服务端运行时和 TypeScript 友好的工程流程。
 
-## Package
+## 安装
 
 ```bash
 npm install openilink-sdk-node
 ```
 
-Repository:
+仓库：
 
 [openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node)
 
-## Highlights
+## 特点
 
-- ESM-first package layout
-- TypeScript source with generated declarations
-- Built on native `fetch` in Node.js 18+
-- Helper exports for common message parsing
+- ESM 优先的包结构
+- TypeScript 源码与声明文件输出
+- 基于 Node.js 18+ 原生 `fetch`
+- 提供常见消息解析辅助方法
 
-## Typical Flow
+## 典型流程
 
 ```ts
 import { Client, extractText } from "openilink-sdk-node";
@@ -46,10 +46,12 @@ await client.monitor(async (message) => {
 });
 ```
 
-## Recommended Use
+## 适用场景
 
-Choose the Node.js SDK when you want:
+如果你希望：
 
-- fast iteration in TypeScript
-- simple build integration in Node services
-- shared code patterns across server and tooling layers
+- 在 TypeScript 中快速迭代
+- 在 Node 服务里低成本集成
+- 在服务端与工具链之间复用相似代码模式
+
+那么 Node.js SDK 会更合适。

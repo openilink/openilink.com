@@ -1,21 +1,23 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  lang: "en-US",
+  lang: "zh-CN",
   title: "OpenILink",
-  description: "OpenILink official website and documentation.",
+  description: "OpenILink 官方网站与文档中心。",
   cleanUrls: true,
   lastUpdated: true,
+  appearance: false,
   sitemap: {
     hostname: "https://openilink.com"
   },
   themeConfig: {
     logo: "/mark.svg",
     nav: [
-      { text: "Guide", link: "/guide/" },
+      { text: "指南", link: "/guide/" },
       { text: "SDK", link: "/sdk/" },
-      { text: "Roadmap", link: "/roadmap" },
-      { text: "Community", link: "/community" }
+      { text: "仓库", link: "/repositories" },
+      { text: "路线图", link: "/roadmap" },
+      { text: "社区", link: "/community" }
     ],
     socialLinks: [
       { icon: "github", link: "https://github.com/openilink" }
@@ -24,15 +26,15 @@ export default defineConfig({
       provider: "local"
     },
     footer: {
-      message: "Open tooling for conversational systems.",
+      message: "开放接口，连接下一代会话系统。",
       copyright: "Copyright © 2026 OpenILink"
     },
     sidebar: {
       "/guide/": [
         {
-          text: "Guide",
+          text: "指南",
           items: [
-            { text: "Overview", link: "/guide/" }
+            { text: "概览", link: "/guide/" }
           ]
         }
       ],
@@ -40,7 +42,7 @@ export default defineConfig({
         {
           text: "SDK",
           items: [
-            { text: "Overview", link: "/sdk/" },
+            { text: "总览", link: "/sdk/" },
             { text: "Node.js SDK", link: "/sdk/node" },
             { text: "PHP SDK", link: "/sdk/php" }
           ]

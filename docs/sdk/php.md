@@ -1,25 +1,25 @@
 # PHP SDK
 
-The PHP SDK is intended for PHP applications that want a direct integration layer without heavy dependencies.
+PHP SDK 面向希望直接接入、又不想引入过多依赖的 PHP 应用。
 
-## Package
+## 安装
 
 ```bash
 composer require openilink/openilink-sdk-php
 ```
 
-Repository:
+仓库：
 
 [openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php)
 
-## Highlights
+## 特点
 
-- Minimal dependency surface
-- Native cURL-based HTTP transport
-- Simple associative-array request and response model
-- Long-poll monitoring loop with callback hooks
+- 依赖面尽量保持最小
+- 使用原生 cURL 完成 HTTP 传输
+- 请求和响应使用直白的关联数组模型
+- 长轮询监听循环支持回调钩子
 
-## Typical Flow
+## 典型流程
 
 ```php
 <?php
@@ -35,7 +35,7 @@ $result = $client->loginWithQr([
 ]);
 
 if (!($result['connected'] ?? false)) {
-    throw new RuntimeException((string) ($result['message'] ?? 'Login failed'));
+    throw new RuntimeException((string) ($result['message'] ?? '登录失败'));
 }
 
 $client->monitor(static function (array $message) use ($client): void {
@@ -46,16 +46,18 @@ $client->monitor(static function (array $message) use ($client): void {
 
     $client->sendText(
         (string) $message['from_user_id'],
-        'Received: ' . $text,
+        '收到: ' . $text,
         (string) $message['context_token'],
     );
 });
 ```
 
-## Recommended Use
+## 适用场景
 
-Choose the PHP SDK when you want:
+如果你希望：
 
-- direct integration into existing PHP systems
-- Composer-based dependency management
-- a thin SDK layer that stays close to the wire format
+- 直接集成进现有 PHP 系统
+- 使用 Composer 管理依赖
+- 使用更贴近协议原始形态的轻量 SDK
+
+那么 PHP SDK 会更合适。
