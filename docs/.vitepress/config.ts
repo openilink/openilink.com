@@ -5,6 +5,7 @@ export default defineConfig({
   title: "OpenILink",
   description: "OpenILink 官方网站与文档中心。",
   head: [["link", { rel: "icon", href: "/mark.svg" }]],
+  base: "/openilink.com/",
   cleanUrls: true,
   lastUpdated: true,
   appearance: false,
