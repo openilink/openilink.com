@@ -15,6 +15,7 @@ export default defineConfig({
   themeConfig: {
     logo: "/mark.svg",
     nav: [
+      { text: "Hub", link: "https://hub.openilink.com" },
       { text: "指南", link: "/guide/" },
       { text: "SDK", link: "/sdk/" },
       { text: "仓库", link: "/repositories" },
