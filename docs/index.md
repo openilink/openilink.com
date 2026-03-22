@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: OpenILink
-  text: 面向会话系统的开放连接层
-  tagline: 为机器人、智能体与消息驱动产品提供统一接入面。OpenILink 当前公开 10 个仓库，覆盖官网、Hub、中枢与渠道集成，以及 6 个官方 SDK。
+  text: "帮微信 Clawbot 做 1:N 分发"
+  tagline: "简单说，OpenILink 用来解决一件事：让一个机器人能稳定连接很多会话，并把分发、广播、回复这几件事做得更简单。Hub 是平台入口，SDK 是代码接入工具。"
   image:
     src: /openilink.svg
     alt: OpenILink
@@ -13,65 +13,48 @@ hero:
       text: 进入 Hub
       link: https://hub.openilink.com
     - theme: alt
-      text: 查看接入指南
-      link: /guide/
-    - theme: alt
       text: 浏览 SDK
       link: /sdk/
+    - theme: alt
+      text: 查看接入指南
+      link: /guide/
 
 features:
-  - icon: ◎
-    title: 6 条官方 SDK 线路
-    details: Node.js、PHP、Go、Python、C#、Java 六条 SDK 线路持续对齐，优先覆盖登录、轮询、发消息和上下文管理等核心动作。
-  - icon: ▣
-    title: Hub 与文档双入口
-    details: Hub 提供更直接的平台入口，官网负责解释仓库矩阵、SDK 状态与接入路径，减少在多个仓库间来回切换的成本。
-  - icon: ⇢
-    title: 面向生态扩展
-    details: 除 Hub 外，组织中还公开维护 Telegram 与 OpenClaw 渠道相关仓库，后续可继续向 API 参考、部署手册与集成配方扩展。
+  - icon: "◎"
+    title: 一个机器人，服务很多会话
+    details: 不只是单聊回复，而是让同一个机器人可以面对多个用户、多个群组和多个触达目标。
+  - icon: "▣"
+    title: 先看平台，就去 Hub
+    details: 如果你想先看分发、广播和平台能力，Hub 是第一入口。
+  - icon: "⌘"
+    title: 要写代码，就用 SDK
+    details: 提供 Node.js、PHP、Go、Python、C#、Java 六种语言 SDK，方便直接接入。
+  - icon: "→"
+    title: 第一次接触，也能看懂
+    details: 官网负责把 Hub、SDK、仓库和接入顺序讲清楚，不需要先懂整套架构。
 ---
 
-## 为什么是 OpenILink
+> 如果你只想快速理解一句话，可以把 OpenILink 看成“面向微信 Clawbot 的分发平台 + 多语言 SDK”。
 
-OpenILink 不是单一仓库，而是一套围绕会话接入构建的公开工程表面。它把最常用的动作压缩成一条清晰链路：登录、收消息、回消息、维护上下文，再往上叠加 Hub 能力和第三方渠道集成。目标很直接，让团队先看到一条可执行的接入路径，而不是先被过重的概念层淹没。
+## OpenILink 是什么
 
-## 你可以在这里找到什么
+OpenILink 是为微信 Clawbot 准备的一套工具。
 
-- 项目定位与整体结构
-- Hub 入口与平台表面
-- 组织全部公开仓库入口
-- 6 个运行时 SDK 的接入说明与状态
-- 面向实际接入的快速开始
-- 路线图与扩展方向
-- 社区与仓库链接
+它主要做两件事：
 
-## 推荐起步路径
+- 帮你把一个机器人连接到很多会话目标
+- 帮你用熟悉的编程语言快速接入
 
-- 想先进入平台表面：直接打开 [Hub](https://hub.openilink.com)
-- 想理解项目结构：先看 [仓库页](/repositories)
-- 想开始做接入：进入 [SDK 总览](/sdk/)
-- 想看方向和约束：阅读 [指南](/guide/)
+## 为什么要强调 1:N
 
-## 接入原则
+这里说的 `1:N`，就是“一个机器人，对很多会话目标”。
 
-OpenILink 倾向于保持窄入口、强一致性和低理解成本：
+当你的机器人不再只服务一个用户，而是要面对多个用户、多个群组、多个触达目标时，分发、广播和回复就会开始变复杂。OpenILink 重点解决的就是这个阶段的问题。
 
-- 对外接口尽量对齐不同语言 SDK
-- 文档贴近真实实现，不写空泛概念页
-- 示例以“可以直接改成自己项目”为目标
-- 允许生态逐步扩展，而不是一开始就设计过重
+## 你应该从哪里开始
 
-## 当前公开仓库矩阵
+你只需要按自己的目标选入口：
 
-- 官网：`openilink.com`
-- 中枢：`openilink-hub`
-- 渠道与生态：`openilink-tg`、`openclaw-channel-openilink`
-- SDK：`openilink-sdk-node`、`openilink-sdk-php`、`openilink-sdk-go`、`openilink-sdk-python`、`openilink-sdk-csharp`、`openilink-sdk-java`
-
-## 快速入口
-
-- [Hub 平台](https://hub.openilink.com)
-- [接入指南](/guide/)
-- [SDK 总览](/sdk/)
-- [组织仓库](/repositories)
-- [社区页面](/community)
+- 想先看平台和分发能力：去 [Hub](https://hub.openilink.com)
+- 想直接开始开发：去 [SDK 总览](/sdk/)
+- 想先搞清楚 Hub、SDK 和整体结构：看 [指南](/guide/)
