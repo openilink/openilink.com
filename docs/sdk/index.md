@@ -1,6 +1,6 @@
 # SDK 总览
 
-OpenILink 已经在多个运行时上展开 SDK 布局。当前组织下共有 6 个公开 SDK 仓库，覆盖 Node.js、PHP、Go、Python、C# 与 Java。它们的成熟度并不完全一致，但已经构成了统一的接入入口矩阵。
+OpeniLink 已经在多个运行时上展开 SDK 布局。当前组织下共有 6 个公开 SDK 仓库，覆盖 Node.js、PHP、Go、Python、C# 与 Java。它们的成熟度并不完全一致，但已经构成了统一的接入入口矩阵。
 
 ## SDK 列表
 

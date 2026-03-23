@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: OpenILink
+  name: OpeniLink
   text: "帮微信 Clawbot 做 1:N 分发"
-  tagline: "简单说，OpenILink 用来解决一件事：让一个机器人能稳定连接很多会话，并把分发、广播、回复这几件事做得更简单。Hub 是平台入口，SDK 是代码接入工具。"
+  tagline: "简单说，OpeniLink 用来解决一件事：让一个机器人能稳定连接很多会话，并把分发、广播、回复这几件事做得更简单。Hub 是平台入口，SDK 是代码接入工具。"
   image:
     src: /openilink.svg
-    alt: OpenILink
+    alt: OpeniLink
   actions:
     - theme: brand
       text: 进入 Hub
@@ -34,11 +34,11 @@ features:
     details: 官网负责把 Hub、SDK、仓库和接入顺序讲清楚，不需要先懂整套架构。
 ---
 
-> 如果你只想快速理解一句话，可以把 OpenILink 看成“面向微信 Clawbot 的分发平台 + 多语言 SDK”。
+> 如果你只想快速理解一句话，可以把 OpeniLink 看成“面向微信 Clawbot 的分发平台 + 多语言 SDK”。
 
-## OpenILink 是什么
+## OpeniLink 是什么
 
-OpenILink 是为微信 Clawbot 准备的一套工具。
+OpeniLink 是为微信 Clawbot 准备的一套工具。
 
 它主要做两件事：
 
@@ -49,7 +49,7 @@ OpenILink 是为微信 Clawbot 准备的一套工具。
 
 这里说的 `1:N`，就是“一个机器人，对多个渠道”。
 
-当你的机器人不再只接一个入口，而是要同时面对飞书、钉钉、Telegram、WhatsApp 等多个渠道时，分发、广播和统一回复就会开始变复杂。OpenILink 重点解决的就是这个阶段的问题。
+当你的机器人不再只接一个入口，而是要同时面对飞书、钉钉、Telegram、WhatsApp 等多个渠道时，分发、广播和统一回复就会开始变复杂。OpeniLink 重点解决的就是这个阶段的问题。
 
 ## 你应该从哪里开始
 

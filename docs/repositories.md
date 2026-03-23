@@ -6,7 +6,7 @@
 
 | 仓库 | 类型 | 语言 | 说明 |
 | --- | --- | --- | --- |
-| [openilink/openilink.com](https://github.com/openilink/openilink.com) | 官网 | - | OpenILink 官方网站与文档中心 |
+| [openilink/openilink.com](https://github.com/openilink/openilink.com) | 官网 | - | OpeniLink 官方网站与文档中心 |
 | [openilink/openilink-hub](https://github.com/openilink/openilink-hub) | 中枢服务 | Go | 面向平台中枢能力的仓库 |
 | [openilink/openilink-tg](https://github.com/openilink/openilink-tg) | 生态集成 | Go | Telegram 相关集成方向 |
 | [openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node) | SDK | TypeScript | Node.js / TypeScript SDK |

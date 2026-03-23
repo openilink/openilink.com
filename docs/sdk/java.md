@@ -1,6 +1,6 @@
 # Java SDK
 
-Java SDK 面向 JVM 生态，适合希望在 Java 或 Spring 服务中接入 OpenILink 的团队。
+Java SDK 面向 JVM 生态，适合希望在 Java 或 Spring 服务中接入 OpeniLink 的团队。
 
 ## 仓库
 
@@ -8,13 +8,13 @@ Java SDK 面向 JVM 生态，适合希望在 Java 或 Spring 服务中接入 Ope
 
 ## 定位
 
-Java SDK 负责把 OpenILink 的接入能力带到 JVM 运行时中，并与其他语言 SDK 共同围绕统一的消息链路模型演进。
+Java SDK 负责把 OpeniLink 的接入能力带到 JVM 运行时中，并与其他语言 SDK 共同围绕统一的消息链路模型演进。
 
 ## 适用场景
 
 - Java / Spring 服务端系统
 - 偏向稳定工程体系和长期维护的项目
-- 需要和其他多语言服务共同接入 OpenILink 的团队
+- 需要和其他多语言服务共同接入 OpeniLink 的团队
 
 ## 当前建议
 

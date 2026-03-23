@@ -8,7 +8,7 @@ Python SDK 面向脚本化能力、服务端集成和更偏自动化的应用场
 
 ## 定位
 
-Python SDK 是 OpenILink 多语言接入矩阵的一部分，目标是在 Python 生态下提供与其他运行时尽量一致的能力模型。
+Python SDK 是 OpeniLink 多语言接入矩阵的一部分，目标是在 Python 生态下提供与其他运行时尽量一致的能力模型。
 
 ## 适用场景
 
