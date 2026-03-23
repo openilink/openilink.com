@@ -2,8 +2,8 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   lang: "zh-CN",
-  title: "OpenILink",
-  description: "OpenILink 官方网站与文档中心。",
+  title: "OpeniLink",
+  description: "OpeniLink 官方网站与文档中心。",
   head: [["link", { rel: "icon", href: "/openilink.svg" }]],
   base: "/",
   cleanUrls: true,
