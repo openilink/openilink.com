@@ -1,0 +1,179 @@
+---
+title: 架构说明
+description: OpeniLink Hub 的技术架构、核心模块和消息流转机制。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 技术栈概览
+
+OpeniLink Hub 采用以下技术栈构建：
+
+| 层级 | 技术 | 说明 |
+| --- | --- | --- |
+| 后端 | Go | 39000+ 行代码，103 个 API 端点 |
+| 前端 | React 19 | 基于 Vite 构建的现代 SPA |
+| 数据库 | PostgreSQL 17 | 主数据存储，支持自动迁移 |
+| 对象存储 | MinIO (S3 兼容) | 文件和媒体资源存储 |
+| 容器化 | Docker / Docker Compose | 一键部署 |
+
+## 核心模块
+
+Hub 的后端由以下核心模块组成：
+
+### Bot Manager（Bot 管理器）
+
+负责微信 Bot 的生命周期管理：
+
+- Bot 的扫码绑定与上线/下线状态维护
+- 多 Bot 并行管理，每个用户可绑定多个 Bot
+- Bot 状态的实时监控和心跳检测
+- Bot 与 Channel 之间的关联管理
+
+### WebSocket Relay Hub（WebSocket 中继中心）
+
+Hub 内部的消息中继枢纽：
+
+- 管理所有活跃的 WebSocket 连接
+- 将入站消息实时广播到对应的 Channel 消费者
+- 支持消息序列号（seq）和消息重放机制
+- 处理连接的心跳和重连逻辑
+
+### Sink（消息分发出口）
+
+消息从 Hub 流出的三种通道：
+
+- **WebSocket Sink**：实时推送消息到 WebSocket 客户端，毫秒级延迟
+- **Webhook Sink**：将消息以 HTTP POST 回调的方式推送到外部服务
+- **AI Sink**：将消息送入 AI 模型处理，自动生成回复并发送
+
+### Provider（消息协议提供者）
+
+负责与底层消息协议交互：
+
+- 当前支持 **iLink 协议**，用于微信消息的收发
+- 采用可扩展设计，后续可接入更多协议（如 Telegram Bot API 等）
+- 处理协议层的认证、心跳和消息序列化
+
+### Auth（认证模块）
+
+多种认证方式的统一管理：
+
+- Passkey (WebAuthn) 无密码认证
+- 用户名/密码认证（bcrypt 哈希）
+- OAuth 2.0（GitHub、LinuxDo）
+- 二维码扫码登录
+- Session 管理（7 天有效期）
+
+### Database（数据层）
+
+基于 PostgreSQL 的数据持久化：
+
+- 自动数据库迁移，启动时自动应用 schema 变更
+- 支持事务和连接池管理
+
+## 消息流转
+
+OpeniLink Hub 的消息流转遵循以下路径：
+
+### 入站消息流程
+
+```
+微信用户发送消息
+    ↓
+iLink 协议 (Provider)
+    ↓
+Bot Manager 接收原始消息
+    ↓
+消息持久化存储到数据库
+    ↓
+根据 Channel 配置进行路由和过滤
+    ↓
+三种 Sink 并行分发
+    ├─→ WebSocket Sink → 实时推送到 WS 客户端
+    ├─→ Webhook Sink  → HTTP POST 到外部服务 URL
+    └─→ AI Sink       → 送入 AI 模型生成回复
+```
+
+### 出站消息流程
+
+```
+开发者通过 SDK / API / AI 生成回复
+    ↓
+Hub 接收发送请求（REST API 或 WebSocket）
+    ↓
+Bot Manager 将消息交给 Provider
+    ↓
+iLink 协议发送消息到微信
+    ↓
+微信用户收到回复
+```
+
+### 三种 Sink 的分发机制
+
+每个 Channel 可以独立配置使用哪些 Sink：
+
+1. **WebSocket 实时推送**：适合需要即时处理消息的场景，延迟极低。客户端通过 WebSocket 连接到 Channel，实时接收消息并发送回复。
+
+2. **Webhook HTTP 回调**：适合对接已有的 HTTP 服务。Hub 将消息以 POST 请求推送到配置的 URL，支持 Bearer Token、自定义 Header 和 HMAC 签名三种认证方式。
+
+3. **AI 自动回复**：适合需要智能对话的场景。Hub 将消息发送到 OpenAI 兼容 API，自动生成回复并发送。支持全局和 Channel 级别的独立 AI 配置。
+
+<Callout type="info">
+三种 Sink 可以同时启用。例如，一个 Channel 可以同时配置 Webhook 回调和 AI 自动回复，消息会被并行分发到两个通道。
+</Callout>
+
+## Provider 模型
+
+当前 Hub 仅支持 iLink 协议作为消息 Provider，但架构设计上保留了扩展空间：
+
+```
+Provider 接口
+    ├─→ iLink Provider (当前实现)
+    │       └── 微信消息收发
+    ├─→ Telegram Provider (规划中)
+    │       └── Telegram Bot API
+    └─→ 更多 Provider...
+```
+
+每个 Provider 需要实现以下核心能力：
+
+- 认证和会话建立
+- 消息接收（长轮询或推送）
+- 消息发送
+- 状态管理（在线/离线/心跳）
+
+## 数据模型
+
+Hub 的核心数据模型及其关系：
+
+```
+User (用户)
+  │
+  ├── 1:N ── Bot (微信 Bot)
+  │            │
+  │            ├── 1:N ── Channel (消息通道)
+  │            │            │
+  │            │            ├── 配置: API Key, 过滤规则, Sink 配置
+  │            │            │
+  │            │            └── N:N ── Message (消息)
+  │            │
+  │            └── 1:N ── App (第三方应用)
+  │
+  └── 认证信息: Passkey, OAuth, Password
+```
+
+### 关键实体说明
+
+- **User**：Hub 的注册用户，可以通过多种方式认证。
+- **Bot**：一个绑定到 Hub 的微信账号实例。每个用户可以绑定多个 Bot。
+- **Channel**：Bot 下的消息分发通道。每个 Channel 有独立的 API Key、过滤规则和 Sink 配置。Channel 是 SDK 和 API 接入的基本单元。
+- **Message**：通过 Bot 收发的消息记录，包含发送者、内容、类型、时间戳等信息。
+- **App**：安装到 Bot 上的第三方扩展应用，通过事件订阅和 Bot API 与 Hub 交互。
+
+## 下一步
+
+- 快速部署 Hub：[快速开始](/docs/guide/quick-start)
+- 了解部署细节：[部署指南](/docs/hub/deployment)
+- 了解 WebSocket 协议：[WebSocket 接入](/docs/hub/websocket)
+- 了解 App 开发：[App 开发](/docs/hub/apps)

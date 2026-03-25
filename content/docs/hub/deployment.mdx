@@ -1,0 +1,268 @@
+---
+title: 部署指南
+description: 使用 Docker Compose 一键部署 OpeniLink Hub，包括 PostgreSQL 和 MinIO。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Docker Compose 部署
+
+OpeniLink Hub 推荐使用 Docker Compose 进行部署，一条命令即可启动所有依赖服务。
+
+### 前置要求
+
+- Docker 20.10+
+- Docker Compose v2+
+- 至少 1GB 可用内存
+
+### 克隆并启动
+
+```bash
+git clone https://github.com/openilink/openilink-hub.git
+cd openilink-hub
+docker compose up -d
+```
+
+### 服务组成
+
+Docker Compose 配置包含三个服务：
+
+#### 1. PostgreSQL 17
+
+```yaml
+# 数据库服务
+postgres:
+  image: postgres:17
+  ports:
+    - "15432:5432"
+  environment:
+    POSTGRES_USER: openilink
+    POSTGRES_PASSWORD: openilink
+    POSTGRES_DB: openilink
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+```
+
+- 端口映射：宿主机 `15432` → 容器 `5432`
+- 默认用户名/密码：`openilink` / `openilink`
+- 数据持久化到 Docker Volume
+
+#### 2. MinIO 对象存储
+
+```yaml
+# 对象存储服务
+minio:
+  image: minio/minio
+  ports:
+    - "19000:9000"   # API 端口
+    - "19001:9001"   # 控制台端口
+  environment:
+    MINIO_ROOT_USER: openilink
+    MINIO_ROOT_PASSWORD: openilink
+  command: server /data --console-address ":9001"
+  volumes:
+    - minio_data:/data
+```
+
+- API 端口：`19000`，用于文件上传和下载
+- 控制台端口：`19001`，可通过浏览器管理存储桶
+- 默认用户名/密码：`openilink` / `openilink`
+
+#### 3. OpeniLink Hub
+
+```yaml
+# Hub 主服务
+hub:
+  image: openilink/openilink-hub
+  ports:
+    - "9800:9800"
+  environment:
+    LISTEN: ":9800"
+    DATABASE_URL: "postgres://openilink:openilink@postgres:5432/openilink?sslmode=disable"
+    SECRET: "change-me-in-production"
+    STORAGE_ENDPOINT: "minio:9000"
+    STORAGE_ACCESS_KEY: "openilink"
+    STORAGE_SECRET_KEY: "openilink"
+    STORAGE_BUCKET: "openilink"
+    RP_ORIGIN: "http://localhost:9800"
+    RP_ID: "localhost"
+  depends_on:
+    - postgres
+    - minio
+```
+
+## 完整环境变量
+
+以下是 OpeniLink Hub 支持的全部环境变量：
+
+### 基础配置
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `LISTEN` | `:9800` | HTTP 监听地址，格式为 `:端口` 或 `地址:端口` |
+| `DATABASE_URL` | `postgres://openilink:openilink@localhost:15432/openilink?sslmode=disable` | PostgreSQL 连接字符串 |
+| `SECRET` | `change-me-in-production` | 服务端密钥，用于 Session 签名和数据加密 |
+
+### WebAuthn 配置
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `RP_ORIGIN` | `http://localhost:9800` | WebAuthn Relying Party 源地址，需与用户访问的 URL 一致 |
+| `RP_ID` | `localhost` | WebAuthn Relying Party ID，通常为域名（不含端口） |
+
+### 对象存储配置
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `STORAGE_ENDPOINT` | — | MinIO/S3 兼容存储的端点地址 |
+| `STORAGE_ACCESS_KEY` | — | 存储访问密钥 |
+| `STORAGE_SECRET_KEY` | — | 存储密钥 |
+| `STORAGE_BUCKET` | `openilink` | 存储桶名称 |
+
+### OAuth 配置
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `GITHUB_CLIENT_ID` | — | GitHub OAuth App 的 Client ID |
+| `GITHUB_CLIENT_SECRET` | — | GitHub OAuth App 的 Client Secret |
+| `LINUXDO_CLIENT_ID` | — | LinuxDo OAuth App 的 Client ID |
+| `LINUXDO_CLIENT_SECRET` | — | LinuxDo OAuth App 的 Client Secret |
+
+### AI 配置（全局）
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `AI_BASE_URL` | — | OpenAI 兼容 API 的基础 URL |
+| `AI_API_KEY` | — | AI API 的密钥 |
+| `AI_MODEL` | — | 使用的模型名称（如 `gpt-4`、`claude-3-sonnet` 等） |
+
+## 生产环境注意事项
+
+<Callout type="error">
+以下配置在生产环境中必须修改，否则将存在安全风险。
+</Callout>
+
+### 1. 修改 SECRET
+
+`SECRET` 用于 Session 签名和敏感数据加密。生产环境务必设置为随机的强密码字符串：
+
+```bash
+# 生成随机密钥
+openssl rand -hex 32
+```
+
+### 2. 配置 RP_ORIGIN 和 RP_ID
+
+Passkey (WebAuthn) 认证要求 `RP_ORIGIN` 和 `RP_ID` 与用户实际访问的域名一致：
+
+```bash
+# 如果你的域名是 hub.example.com
+RP_ORIGIN=https://hub.example.com
+RP_ID=hub.example.com
+```
+
+<Callout type="warn">
+`RP_ORIGIN` 必须包含协议（`https://`），`RP_ID` 只需要域名部分。如果配置不匹配，Passkey 注册和登录将失败。
+</Callout>
+
+### 3. 配置 SSL
+
+生产环境建议使用反向代理（如 Nginx、Caddy）配置 HTTPS：
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name hub.example.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:9800;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket 支持
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+### 4. 数据库安全
+
+- 修改 PostgreSQL 的默认密码
+- 限制数据库端口的网络访问
+- 定期备份数据库
+
+## 配置 OAuth 提供者
+
+### GitHub OAuth
+
+1. 在 GitHub 上创建 OAuth App：[Settings > Developer settings > OAuth Apps](https://github.com/settings/developers)
+2. 设置 Authorization callback URL 为 `https://你的域名/api/auth/callback/github`
+3. 配置环境变量：
+
+```bash
+GITHUB_CLIENT_ID=你的_client_id
+GITHUB_CLIENT_SECRET=你的_client_secret
+```
+
+### LinuxDo OAuth
+
+1. 在 LinuxDo 开发者设置中创建 OAuth 应用
+2. 设置回调 URL 为 `https://你的域名/api/auth/callback/linuxdo`
+3. 配置环境变量：
+
+```bash
+LINUXDO_CLIENT_ID=你的_client_id
+LINUXDO_CLIENT_SECRET=你的_client_secret
+```
+
+## 配置全局 AI
+
+管理员可以在 Hub 中配置全局 AI 设置，使所有 Channel 都能使用 AI 自动回复功能：
+
+1. 使用管理员账号登录 Hub
+2. 进入管理面板的 AI 配置页面
+3. 设置 OpenAI 兼容 API 的参数：
+   - **Base URL**：API 端点地址（如 `https://api.openai.com/v1`）
+   - **API Key**：API 密钥
+   - **Model**：模型名称（如 `gpt-4`）
+
+或者通过环境变量配置：
+
+```bash
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=sk-xxxxx
+AI_MODEL=gpt-4
+```
+
+<Callout type="info">
+全局 AI 配置后，每个 Channel 可以选择使用全局配置（`source: "builtin"`）或自定义配置（`source: "custom"`）。
+</Callout>
+
+## 数据库自动迁移
+
+OpeniLink Hub 在每次启动时会自动检测并执行数据库迁移：
+
+- 首次启动时自动创建所有表结构
+- 版本升级时自动应用新的 schema 变更
+- 迁移过程是幂等的，重复执行不会产生副作用
+- 无需手动运行任何迁移命令
+
+如果需要查看迁移日志，可以通过以下命令查看 Hub 容器的启动日志：
+
+```bash
+docker compose logs hub
+```
+
+## 下一步
+
+- 了解 WebSocket 接入：[WebSocket 接入](/docs/hub/websocket)
+- 配置 Webhook 回调：[Webhook 与插件](/docs/hub/webhook)
+- 设置 AI 自动回复：[AI 自动回复](/docs/hub/ai-reply)
+- 了解认证方式：[认证方式](/docs/hub/authentication)

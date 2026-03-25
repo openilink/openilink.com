@@ -1,0 +1,69 @@
+---
+title: PHP SDK
+description: 依赖最小的 PHP SDK，使用原生 cURL 完成 HTTP 传输。
+---
+
+PHP SDK 面向希望直接接入、又不想引入过多依赖的 PHP 应用。
+
+## 安装
+
+```bash
+composer require openilink/openilink-sdk-php
+```
+
+仓库：
+
+[openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php)
+
+## 特点
+
+- 依赖面尽量保持最小
+- 使用原生 cURL 完成 HTTP 传输
+- 请求和响应使用直白的关联数组模型
+- 长轮询监听循环支持回调钩子
+
+## 典型流程
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use OpenILink\Client;
+use OpenILink\MessageHelper;
+
+// 使用 API Key 初始化客户端
+$client = new Client('<你的 API Key>');
+$result = $client->loginWithQr([
+    'on_qrcode' => static fn (string $url) => print($url . PHP_EOL),
+]);
+
+if (!($result['connected'] ?? false)) {
+    throw new RuntimeException((string) ($result['message'] ?? '登录失败'));
+}
+
+// 监听并处理消息
+$client->monitor(static function (array $message) use ($client): void {
+    $text = MessageHelper::extractText($message);
+    if ($text === '') {
+        return;
+    }
+
+    // 回复消息
+    $client->sendText(
+        (string) $message['from_user_id'],
+        '收到: ' . $text,
+        (string) $message['context_token'],
+    );
+});
+```
+
+## 适用场景
+
+如果你希望：
+
+- 直接集成进现有 PHP 系统
+- 使用 Composer 管理依赖
+- 使用更贴近协议原始形态的轻量 SDK
+
+那么 PHP SDK 会更合适。

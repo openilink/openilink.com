@@ -1,0 +1,274 @@
+---
+title: 消息追踪
+description: 通过消息追踪系统调试和诊断消息流程问题。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 概述
+
+OpeniLink Hub 为每条消息提供完整的追踪链路，帮助开发者调试和诊断消息处理过程中的问题。通过追踪系统，你可以清楚地看到一条消息从接收到最终处理的每一个步骤及其状态。
+
+## 追踪步骤
+
+每条消息的处理链路包含以下四个步骤：
+
+```
+inbound → webhook → ai → outbound
+```
+
+| 步骤 | 说明 |
+| --- | --- |
+| **inbound** | 消息接收：Bot 从微信收到原始消息 |
+| **webhook** | Webhook 处理：将消息推送到 Webhook URL（如已配置） |
+| **ai** | AI 处理：将消息发送给 AI 模型生成回复（如已启用） |
+| **outbound** | 消息发送：将回复消息发送回微信 |
+
+## 步骤状态
+
+每个步骤记录以下状态之一：
+
+| 状态 | 说明 |
+| --- | --- |
+| `success` | 步骤执行成功 |
+| `error` | 步骤执行失败，包含错误详情 |
+| `skipped` | 步骤被跳过（如未配置 Webhook 或未启用 AI） |
+
+### 状态示例
+
+一条正常处理的消息追踪记录：
+
+```json
+{
+  "trace_id": "tr_xxx",
+  "message_id": "msg_xxx",
+  "bot_id": "bot_xxx",
+  "channel_id": "ch_xxx",
+  "created_at": "2024-03-25T10:30:00Z",
+  "steps": [
+    {
+      "name": "inbound",
+      "status": "success",
+      "duration_ms": 5,
+      "detail": {
+        "from_user_id": "wxid_xxx",
+        "content": "你好",
+        "msg_type": 1
+      }
+    },
+    {
+      "name": "webhook",
+      "status": "success",
+      "duration_ms": 120,
+      "detail": {
+        "url": "https://example.com/webhook",
+        "response_status": 200,
+        "plugin_reply": null
+      }
+    },
+    {
+      "name": "ai",
+      "status": "success",
+      "duration_ms": 1500,
+      "detail": {
+        "model": "gpt-4",
+        "reply": "你好！有什么可以帮助你的？",
+        "tokens_used": 45
+      }
+    },
+    {
+      "name": "outbound",
+      "status": "success",
+      "duration_ms": 30,
+      "detail": {
+        "to_user_id": "wxid_xxx",
+        "content": "你好！有什么可以帮助你的？"
+      }
+    }
+  ]
+}
+```
+
+一条 Webhook 失败的消息追踪记录：
+
+```json
+{
+  "trace_id": "tr_yyy",
+  "steps": [
+    {
+      "name": "inbound",
+      "status": "success",
+      "duration_ms": 4
+    },
+    {
+      "name": "webhook",
+      "status": "error",
+      "duration_ms": 5000,
+      "detail": {
+        "url": "https://example.com/webhook",
+        "error": "connection timeout after 5000ms"
+      }
+    },
+    {
+      "name": "ai",
+      "status": "skipped",
+      "detail": {
+        "reason": "AI 未启用"
+      }
+    },
+    {
+      "name": "outbound",
+      "status": "skipped",
+      "detail": {
+        "reason": "无回复内容"
+      }
+    }
+  ]
+}
+```
+
+## 追踪 API
+
+### 获取追踪列表
+
+获取指定 Bot 的消息追踪记录列表。
+
+```
+GET /api/bots/{id}/traces
+```
+
+**查询参数：**
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `page` | number | 页码，默认 1 |
+| `per_page` | number | 每页条数，默认 20 |
+| `status` | string | 按状态过滤：`success`、`error` |
+| `channel_id` | string | 按 Channel 过滤 |
+
+**请求示例：**
+
+```bash
+curl "https://hub.openilink.com/api/bots/bot_xxx/traces?page=1&per_page=10&status=error" \
+  -H "Cookie: session=xxx"
+```
+
+**响应：**
+
+```json
+{
+  "traces": [
+    {
+      "trace_id": "tr_xxx",
+      "message_id": "msg_xxx",
+      "status": "error",
+      "created_at": "2024-03-25T10:30:00Z",
+      "summary": "webhook 步骤失败: connection timeout"
+    }
+  ],
+  "total": 42,
+  "page": 1,
+  "per_page": 10
+}
+```
+
+### 获取追踪详情
+
+获取单条追踪记录的完整详情。
+
+```
+GET /api/bots/{id}/traces/{traceId}
+```
+
+**请求示例：**
+
+```bash
+curl "https://hub.openilink.com/api/bots/bot_xxx/traces/tr_xxx" \
+  -H "Cookie: session=xxx"
+```
+
+**响应：**
+
+返回包含所有步骤详情的完整追踪记录（格式见上方"状态示例"）。
+
+## Webhook 日志
+
+追踪系统对 Webhook 步骤记录了更详细的信息，包括：
+
+### 请求详情
+
+| 字段 | 说明 |
+| --- | --- |
+| `url` | Webhook 请求 URL |
+| `method` | HTTP 方法（POST） |
+| `headers` | 请求 Header（包含认证信息） |
+| `body` | 请求体内容 |
+| `sent_at` | 请求发送时间 |
+
+### 响应详情
+
+| 字段 | 说明 |
+| --- | --- |
+| `status` | HTTP 状态码 |
+| `headers` | 响应 Header |
+| `body` | 响应体内容 |
+| `received_at` | 响应接收时间 |
+
+### 执行时间
+
+| 字段 | 说明 |
+| --- | --- |
+| `duration_ms` | 请求到响应的总耗时（毫秒） |
+| `connect_ms` | TCP 连接建立耗时（毫秒） |
+
+### 插件回复
+
+如果 Webhook 配置了 JavaScript 插件，追踪记录还会包含：
+
+| 字段 | 说明 |
+| --- | --- |
+| `plugin_name` | 执行的插件名称 |
+| `plugin_phase` | 执行阶段：`onRequest` 或 `onResponse` |
+| `plugin_reply` | 插件通过 `ctx.reply()` 发送的回复内容 |
+| `plugin_skipped` | 插件是否调用了 `ctx.skip()` |
+| `plugin_duration_ms` | 插件执行耗时（毫秒） |
+
+## 在控制台中使用
+
+Hub 控制台提供了直观的追踪界面：
+
+1. 进入 Bot 详情页
+2. 点击"消息追踪"标签
+3. 查看追踪列表，可按状态和 Channel 过滤
+4. 点击单条记录查看完整的步骤详情
+5. 展开 Webhook 步骤查看请求/响应详情
+
+<Callout type="info">
+追踪记录默认保留 7 天。超过保留期的记录会被自动清理。
+</Callout>
+
+## 常见问题排查
+
+### Webhook 超时
+
+- 检查 Webhook URL 是否可达
+- 检查目标服务的响应时间是否过长（默认超时 5 秒）
+- 确认网络连通性（Hub 服务器能否访问外部网络）
+
+### AI 回复失败
+
+- 检查 AI 配置是否正确（API Key、Base URL、Model）
+- 查看 AI 步骤的错误详情
+- 确认 AI 服务的可用性和配额
+
+### 消息未被 Channel 接收
+
+- 检查 Channel 的过滤规则是否匹配
+- 确认 Channel 的 Sink 是否已启用
+- 查看 inbound 步骤的详情，确认消息是否被正确路由
+
+## 下一步
+
+- 了解 Webhook 配置：[Webhook 与插件](/docs/hub/webhook)
+- 了解 AI 配置：[AI 自动回复](/docs/hub/ai-reply)
+- 查看完整 API 端点：[API 参考](/docs/api)

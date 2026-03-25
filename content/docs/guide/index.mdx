@@ -1,0 +1,120 @@
+---
+title: 指南概览
+description: 了解 OpeniLink 的整体结构、入口关系和设计理念。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## OpeniLink 是什么
+
+OpeniLink 是一个基于微信 iLink 协议的开源消息管理平台。它由三个核心部分组成：
+
+- **Hub 控制台**：集中管理微信 Bot、配置消息路由和分发策略的 Web 平台。
+- **多语言 SDK**：覆盖 Node.js、PHP、Go、Python、C#、Java 六种运行时，让开发者用熟悉的语言快速接入。
+- **渠道集成生态**：通过 Telegram、OpenClaw 等渠道仓库，将消息能力延伸到更多外部场景。
+
+OpeniLink 不是一个单一仓库，而是一个小型生态。官网负责解释整体结构和入口关系，Hub 提供更直接的平台入口，SDK 仓库承担不同运行时的接入细节，渠道仓库则指向外部集成方向。
+
+## 先理解几个入口
+
+你可以把 OpeniLink 理解成四个相互配合的表面：
+
+1. **官网**：`openilink.com`，负责讲清结构、入口和文档。
+2. **Hub**：`hub.openilink.com`，负责承接更直接的平台入口，提供 Bot 管理、Channel 配置、消息追踪等能力。
+3. **SDK**：6 个官方运行时仓库，负责具体的代码层接入。
+4. **渠道与生态**：Telegram 与 OpenClaw 相关仓库，负责把能力延伸到外部场景。
+
+## 为什么首页强调 1:N
+
+这里的 `1:N` 可以直接理解成：
+
+- **1** 个机器人
+- 对 **N** 个渠道
+
+一开始很多人只会把机器人理解成"收到一条消息，回复一条消息"。但在真实场景里，机器人通常要面对：
+
+- 飞书
+- 钉钉
+- Telegram
+- WhatsApp
+- 以及更多渠道的广播和分发动作
+
+OpeniLink 重点解决的就是这个阶段的问题——通过 Channel 机制将一个 Bot 的消息分发到多个下游消费者，每个 Channel 可以独立配置过滤规则、Webhook 回调、AI 自动回复等策略。所以首页会先强调 `1:N`。
+
+## Hub 和 SDK 的区别
+
+Hub 和 SDK 不是同一个东西：
+
+- **Hub**：偏平台入口，适合先看能力和分发表面。通过 Web 控制台管理 Bot、配置 Channel、查看消息日志。
+- **SDK**：偏代码接入，适合直接开发。通过编程方式完成登录、收发消息、状态管理等操作。
+- **官网**：偏说明和导航，适合第一次了解项目全貌。
+
+如果你只想记一句话：
+
+- 想先看平台，去 [Hub](https://hub.openilink.com)
+- 想直接写代码，去 [SDK 总览](/docs/sdk)
+- 想先搞清楚结构，留在当前指南页继续看
+
+## 核心模型
+
+中心链路围绕 Bot 接入展开，无论使用 Hub 还是 SDK，底层都遵循相同的消息模型：
+
+1. **认证建立会话**：完成认证（扫码 / API Key）并建立可用会话。
+2. **长轮询接收消息**：通过长轮询或 WebSocket 接收入站消息。
+3. **响应消息**：发出响应消息与状态更新。
+4. **Context Token 缓存**：缓存 context token 以支持主动触达（24 小时有效）。
+5. **叠加高层能力**：在同一套传输原语之上继续叠加 Webhook、AI 回复、App 扩展等高层能力。
+
+<Callout type="info">
+Context Token 是微信返回的凭证，有效期为 24 小时。首次需要收到用户发来的消息后才能获得，之后可用于主动向该用户发送消息。
+</Callout>
+
+## 站点结构
+
+站点被刻意拆成几个明确区域：
+
+| 区域 | 路径 | 职责 |
+| --- | --- | --- |
+| Hub 平台 | `hub.openilink.com` | 放平台入口，提供 Bot 管理控制台 |
+| 指南 | `/docs/guide/` | 放概念、架构与入门教程 |
+| Hub 文档 | `/docs/hub/` | 放 Hub 平台的详细使用说明 |
+| SDK | `/docs/sdk/` | 放 6 个运行时 SDK 的统一入口与文档 |
+| API 参考 | `/docs/api/` | 放完整的 REST API 端点参考 |
+| 仓库 | `/docs/repositories` | 放组织全部公开仓库索引 |
+| 路线图 | `/docs/roadmap` | 放后续方向与计划 |
+| 社区 | `/docs/community` | 放参与方式和协作入口 |
+
+## 仓库分层
+
+目前可以把 `openilink` 组织理解成四层：
+
+1. **官网层**：`openilink.com` —— 文档站和品牌入口
+2. **中枢层**：`openilink-hub` —— 核心平台，Go 后端 + React 前端
+3. **渠道层**：`openilink-tg`、`openclaw-channel-openilink` —— 外部渠道集成
+4. **SDK 层**：`openilink-sdk-node`、`openilink-sdk-php`、`openilink-sdk-go`、`openilink-sdk-python`、`openilink-sdk-csharp`、`openilink-sdk-java` —— 六种语言的接入包
+
+## 实现原则
+
+OpeniLink 偏向保持窄而清晰的起始面：
+
+- 不同语言 SDK 尽量保持方法和流程对齐。
+- 请求和响应形态优先保持直白，而不是过度抽象。
+- 示例要能直接映射到真实使用场景。
+- 文档结构要便于随着生态增长持续扩展。
+- Hub 与 SDK 保持松耦合，既可独立使用也可组合。
+
+## 建议阅读顺序
+
+根据你的目标选择合适的阅读路径：
+
+- **第一次了解项目**：先看 [Hub](https://hub.openilink.com) 和 [仓库页](/docs/repositories)
+- **想快速体验**：直接看 [快速开始](/docs/guide/quick-start)
+- **想了解技术架构**：看 [架构说明](/docs/guide/architecture)
+- **要开始接入**：先看 [SDK 总览](/docs/sdk)
+- **已经确定运行时**：进入对应 SDK 页面
+- **想了解 Hub 详细功能**：看 [Hub 概览](/docs/hub)
+- **想了解发展方向**：看 [路线图](/docs/roadmap)
+
+## 下一步
+
+如果你要快速开始，推荐直接进入 [快速开始](/docs/guide/quick-start)。如果你要开始代码接入，先进入 [SDK 总览](/docs/sdk)。如果你想先看平台表面，直接打开 [Hub](https://hub.openilink.com)。

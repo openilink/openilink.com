@@ -1,0 +1,64 @@
+---
+title: Node.js SDK
+description: ESM 优先、TypeScript 友好的 Node.js SDK，基于原生 fetch。
+---
+
+Node.js SDK 面向现代服务端运行时和 TypeScript 友好的工程流程。
+
+## 安装
+
+```bash
+npm install openilink-sdk-node
+```
+
+仓库：
+
+[openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node)
+
+## 特点
+
+- ESM 优先的包结构
+- TypeScript 源码与声明文件输出
+- 基于 Node.js 18+ 原生 `fetch`
+- 提供常见消息解析辅助方法
+
+## 典型流程
+
+```ts
+import { Client, extractText } from "openilink-sdk-node";
+
+// 使用 API Key 初始化客户端
+const client = new Client("<你的 API Key>");
+
+// 扫码登录
+const result = await client.loginWithQr({
+  on_qrcode: (url) => console.log(url)
+});
+
+if (!result.connected) {
+  throw new Error(result.message);
+}
+
+// 监听并处理消息
+await client.monitor(async (message) => {
+  const text = extractText(message);
+  if (!text) return;
+
+  // 回复消息
+  await client.sendText(
+    String(message.from_user_id),
+    `Received: ${text}`,
+    String(message.context_token)
+  );
+});
+```
+
+## 适用场景
+
+如果你希望：
+
+- 在 TypeScript 中快速迭代
+- 在 Node 服务里低成本集成
+- 在服务端与工具链之间复用相似代码模式
+
+那么 Node.js SDK 会更合适。

@@ -1,0 +1,369 @@
+---
+title: WebSocket 接入
+description: 通过 WebSocket 实时接收和发送微信消息，毫秒级延迟。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 概述
+
+WebSocket 是 OpeniLink Hub 提供的实时消息通道，适合需要即时处理消息的场景。通过 WebSocket 连接，你可以以毫秒级延迟接收和发送微信消息。
+
+## 连接方式
+
+### 连接端点
+
+```
+GET /api/v1/channels/connect
+```
+
+### 认证
+
+通过 API Key 进行认证，支持两种传递方式：
+
+```bash
+# 方式一：通过 URL 参数
+ws://localhost:9800/api/v1/channels/connect?api_key=YOUR_API_KEY
+
+# 方式二：通过 Header
+ws://localhost:9800/api/v1/channels/connect
+Authorization: Bearer YOUR_API_KEY
+```
+
+<Callout type="info">
+API Key 在创建 Channel 时自动生成，每个 Channel 拥有独立的 API Key。
+</Callout>
+
+## 消息协议
+
+所有 WebSocket 消息都使用 JSON 格式的 Envelope 结构：
+
+```json
+{
+  "type": "消息类型",
+  "reqID": "请求 ID（可选）",
+  "data": {}
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `type` | string | 消息类型标识 |
+| `reqID` | string | 请求 ID，用于匹配请求和响应（上行消息） |
+| `data` | object | 消息负载，结构因类型而异 |
+
+## 下行消息类型
+
+Hub 向客户端推送的消息类型：
+
+### init
+
+连接建立后的初始化消息，包含 Channel 配置信息。
+
+```json
+{
+  "type": "init",
+  "data": {
+    "channel_id": "ch_xxx",
+    "bot_id": "bot_xxx",
+    "bot_status": "online",
+    "last_seq": 12345
+  }
+}
+```
+
+### message
+
+新消息推送，这是最核心的下行消息类型。
+
+```json
+{
+  "type": "message",
+  "data": {
+    "id": "msg_xxx",
+    "seq": 12346,
+    "from_user_id": "wxid_xxx",
+    "from_user_name": "张三",
+    "content": "你好",
+    "msg_type": 1,
+    "session_id": "sess_xxx",
+    "context_token": "ctx_xxx",
+    "timestamp": 1711234567
+  }
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 消息唯一 ID |
+| `seq` | 消息序列号，用于消息重放 |
+| `from_user_id` | 发送者微信 ID |
+| `from_user_name` | 发送者昵称 |
+| `content` | 消息内容 |
+| `msg_type` | 消息类型（1=文本, 3=图片, 等） |
+| `session_id` | 会话 ID |
+| `context_token` | 上下文令牌，回复消息时需要 |
+| `timestamp` | 消息时间戳 |
+
+### send_ack
+
+发送消息的确认响应。
+
+```json
+{
+  "type": "send_ack",
+  "reqID": "req_001",
+  "data": {
+    "success": true,
+    "message_id": "msg_yyy"
+  }
+}
+```
+
+### status
+
+Bot 状态变更通知。
+
+```json
+{
+  "type": "status",
+  "data": {
+    "bot_id": "bot_xxx",
+    "status": "online"
+  }
+}
+```
+
+### error
+
+错误消息。
+
+```json
+{
+  "type": "error",
+  "data": {
+    "code": "INVALID_TOKEN",
+    "message": "API Key 无效"
+  }
+}
+```
+
+### pong
+
+心跳响应，对应客户端发送的 `ping`。
+
+```json
+{
+  "type": "pong"
+}
+```
+
+## 上行消息类型
+
+客户端向 Hub 发送的消息类型：
+
+### send_text
+
+发送文本消息。
+
+```json
+{
+  "type": "send_text",
+  "reqID": "req_001",
+  "data": {
+    "to_user_id": "wxid_xxx",
+    "content": "你好，这是自动回复",
+    "context_token": "ctx_xxx"
+  }
+}
+```
+
+### send_typing
+
+发送打字状态，让对方看到"正在输入"提示。
+
+```json
+{
+  "type": "send_typing",
+  "reqID": "req_002",
+  "data": {
+    "to_user_id": "wxid_xxx",
+    "context_token": "ctx_xxx"
+  }
+}
+```
+
+### get_config
+
+获取当前 Channel 配置。
+
+```json
+{
+  "type": "get_config",
+  "reqID": "req_003"
+}
+```
+
+### ping
+
+心跳检测，Hub 将回复 `pong`。
+
+```json
+{
+  "type": "ping"
+}
+```
+
+## 完整连接流程
+
+一个完整的 WebSocket 连接生命周期如下：
+
+```
+1. 客户端发起 WebSocket 连接（附带 API Key）
+       ↓
+2. Hub 验证 API Key，建立连接
+       ↓
+3. Hub 发送 init 消息（Channel 配置 + 最新 seq）
+       ↓
+4. 客户端根据本地缓存的 last_seq 请求消息重放（如需要）
+       ↓
+5. 进入消息循环：
+   ├── Hub 推送 message → 客户端处理
+   ├── 客户端发送 send_text → Hub 确认 send_ack
+   ├── 客户端定期发送 ping → Hub 回复 pong
+   └── Hub 推送 status → 客户端更新 Bot 状态
+       ↓
+6. 连接断开时，客户端记录 last_seq 用于重连后消息重放
+```
+
+## 消息重放机制
+
+当客户端断线重连后，可能会丢失断线期间的消息。OpeniLink Hub 通过消息序列号（`seq`）实现消息重放：
+
+1. 每条消息都有一个递增的 `seq` 序列号
+2. 客户端应持久化保存最新处理的 `seq`
+3. 重连后，Hub 在 `init` 消息中返回当前最新的 `last_seq`
+4. 如果客户端的 `last_seq` 小于服务端的，Hub 会自动重放缺失的消息
+5. 重放的消息与实时消息格式一致，客户端无需区分处理
+
+<Callout type="warn">
+消息重放有时间窗口限制。如果断线时间过长，部分早期消息可能已被清理，无法重放。
+</Callout>
+
+## 心跳机制
+
+为了保持连接活跃并及时检测断线，客户端应定期发送心跳：
+
+- 建议每 **30 秒** 发送一次 `ping`
+- Hub 会回复 `pong` 消息
+- 如果超过 **60 秒** 未收到任何消息或 `pong`，客户端应主动断开并重连
+- Hub 侧在超过一定时间未收到 `ping` 后也会主动关闭连接
+
+## 代码示例
+
+### Node.js 原生 WebSocket
+
+```ts
+// 使用原生 WebSocket API 连接 Hub
+const ws = new WebSocket(
+  "ws://localhost:9800/api/v1/channels/connect?api_key=YOUR_API_KEY"
+);
+
+ws.onopen = () => {
+  console.log("已连接到 Hub");
+
+  // 启动心跳
+  setInterval(() => {
+    ws.send(JSON.stringify({ type: "ping" }));
+  }, 30000);
+};
+
+ws.onmessage = (event) => {
+  const envelope = JSON.parse(event.data);
+
+  switch (envelope.type) {
+    case "init":
+      console.log("Channel 初始化:", envelope.data);
+      break;
+
+    case "message":
+      const msg = envelope.data;
+      console.log(`收到消息 [${msg.from_user_name}]: ${msg.content}`);
+
+      // 回复消息
+      ws.send(
+        JSON.stringify({
+          type: "send_text",
+          reqID: `req_${Date.now()}`,
+          data: {
+            to_user_id: msg.from_user_id,
+            content: `收到: ${msg.content}`,
+            context_token: msg.context_token,
+          },
+        })
+      );
+      break;
+
+    case "send_ack":
+      console.log("消息发送成功:", envelope.data);
+      break;
+
+    case "status":
+      console.log("Bot 状态变更:", envelope.data);
+      break;
+
+    case "error":
+      console.error("错误:", envelope.data);
+      break;
+
+    case "pong":
+      // 心跳响应，无需处理
+      break;
+  }
+};
+
+ws.onclose = () => {
+  console.log("连接已断开，准备重连...");
+  // 在此实现重连逻辑
+};
+
+ws.onerror = (error) => {
+  console.error("WebSocket 错误:", error);
+};
+```
+
+### 使用 OpeniLink SDK
+
+推荐使用官方 SDK，已封装了连接管理、心跳、重连等逻辑：
+
+```ts
+import { Client, extractText } from "openilink-sdk-node";
+
+const client = new Client("YOUR_API_KEY");
+
+const result = await client.loginWithQr({
+  on_qrcode: (url) => console.log("扫码登录:", url),
+});
+
+if (!result.connected) {
+  throw new Error(result.message);
+}
+
+// SDK 内部通过 WebSocket 接收消息
+await client.monitor(async (message) => {
+  const text = extractText(message);
+  if (!text) return;
+
+  await client.sendText(
+    String(message.from_user_id),
+    `收到: ${text}`,
+    String(message.context_token)
+  );
+});
+```
+
+## 下一步
+
+- 了解 Webhook 回调：[Webhook 与插件](/docs/hub/webhook)
+- 配置 AI 自动回复：[AI 自动回复](/docs/hub/ai-reply)
+- 查看 API 参考：[API 参考](/docs/api)

@@ -1,0 +1,171 @@
+---
+title: 认证方式
+description: OpeniLink Hub 支持多种现代认证方式：Passkey 生物识别、OAuth 和二维码扫码登录。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 概述
+
+OpeniLink Hub 支持多种认证方式，覆盖从无密码生物识别到传统用户名密码的不同场景。所有认证方式最终都会建立一个统一的 Session，有效期为 7 天。
+
+## Passkey (WebAuthn)
+
+Passkey 是 Hub 推荐的认证方式，基于 WebAuthn 标准实现，支持生物识别（指纹、面部识别）和硬件安全密钥（YubiKey 等）。
+
+### 注册流程
+
+1. 用户在注册页面选择 **"使用 Passkey 注册"**
+2. 浏览器弹出系统级的认证器选择
+3. 用户使用指纹、面部识别或硬件密钥完成验证
+4. Hub 存储公钥凭证，注册完成
+
+### 登录流程
+
+1. 用户在登录页面选择 **"使用 Passkey 登录"**
+2. 浏览器自动弹出已注册的 Passkey 列表
+3. 用户选择 Passkey 并完成验证（指纹/面部）
+4. Hub 验证签名，建立 Session
+
+### WebAuthn 配置
+
+Passkey 正常工作需要正确配置以下环境变量：
+
+| 变量 | 说明 | 示例 |
+| --- | --- | --- |
+| `RP_ORIGIN` | 用户访问的完整 URL（含协议） | `https://hub.example.com` |
+| `RP_ID` | 域名部分（不含协议和端口） | `hub.example.com` |
+
+<Callout type="error">
+`RP_ORIGIN` 和 `RP_ID` 必须与用户实际访问的地址一致，否则 Passkey 注册和登录会失败。本地开发时使用默认值 `http://localhost:9800` 和 `localhost`。
+</Callout>
+
+### 安全特性
+
+- 私钥永远不会离开用户的设备
+- 使用公钥加密，Hub 只存储公钥
+- 防钓鱼：Passkey 绑定到特定域名
+- 支持跨设备认证（如手机扫码辅助桌面登录）
+
+## 密码认证
+
+传统的用户名/密码认证方式，适合不支持 Passkey 的环境。
+
+### 注册
+
+1. 用户填写用户名和密码
+2. Hub 使用 **bcrypt** 对密码进行哈希存储
+3. 注册完成，自动建立 Session
+
+### 登录
+
+1. 用户输入用户名和密码
+2. Hub 使用 bcrypt 验证密码哈希
+3. 验证通过，建立 Session
+
+<Callout type="info">
+Hub 使用 bcrypt 算法对密码进行哈希，即使数据库泄漏也无法反推出原始密码。
+</Callout>
+
+## OAuth 2.0
+
+Hub 支持通过第三方 OAuth 提供者登录，当前支持 GitHub 和 LinuxDo。
+
+### GitHub OAuth
+
+1. 用户点击 **"使用 GitHub 登录"**
+2. 浏览器跳转到 GitHub 授权页面
+3. 用户在 GitHub 确认授权
+4. GitHub 回调到 Hub，携带授权码
+5. Hub 用授权码换取用户信息
+6. 如果该 GitHub 账号首次登录，自动创建 Hub 用户
+7. 建立 Session
+
+### LinuxDo OAuth
+
+流程与 GitHub OAuth 一致，区别在于授权页面和回调地址指向 LinuxDo。
+
+### OAuth 配置
+
+需要在环境变量中配置 Client ID 和 Client Secret：
+
+```bash
+# GitHub OAuth
+GITHUB_CLIENT_ID=你的_client_id
+GITHUB_CLIENT_SECRET=你的_client_secret
+
+# LinuxDo OAuth
+LINUXDO_CLIENT_ID=你的_client_id
+LINUXDO_CLIENT_SECRET=你的_client_secret
+```
+
+<Callout type="warn">
+OAuth 回调 URL 需要在第三方平台正确配置，格式为 `https://你的域名/api/auth/callback/github`（或 `linuxdo`）。
+</Callout>
+
+## 二维码扫码登录
+
+Hub 还支持通过微信扫码登录，适合已经绑定了 Bot 的用户。
+
+### 登录流程
+
+1. 用户在登录页面选择 **"扫码登录"**
+2. Hub 生成一个唯一的登录二维码
+3. 用户用已绑定的微信扫描二维码
+4. Hub 通过 WebSocket 实时接收扫码状态
+5. 微信端确认后，Hub 验证身份并建立 Session
+
+### WebSocket 实时轮询状态
+
+扫码登录过程中，Hub 通过 WebSocket 实时推送二维码状态：
+
+```json
+{
+  "type": "qr_status",
+  "data": {
+    "status": "scanned",
+    "user_name": "张三"
+  }
+}
+```
+
+状态变化：
+- `waiting` → 等待扫码
+- `scanned` → 已扫码，等待确认
+- `confirmed` → 已确认，登录成功
+- `expired` → 二维码已过期
+- `cancelled` → 用户取消
+
+## Session 管理
+
+所有认证方式建立的 Session 遵循统一的管理规则：
+
+| 属性 | 值 |
+| --- | --- |
+| 有效期 | **7 天** |
+| 存储方式 | 服务端 Session + 客户端 Cookie |
+| 续期策略 | 每次活跃请求自动续期 |
+| 登出 | 主动登出时销毁 Session |
+
+### 安全性
+
+- Session Token 使用 `SECRET` 环境变量进行签名
+- Cookie 设置 `HttpOnly` 和 `Secure`（生产环境）
+- 支持多设备同时登录，每个设备独立 Session
+
+## 用户自动创建逻辑
+
+Hub 在以下场景会自动创建用户账号：
+
+1. **OAuth 首次登录**：GitHub 或 LinuxDo 账号首次登录时，自动创建 Hub 用户，并关联 OAuth 信息
+2. **扫码绑定 Bot**：当用户扫码绑定微信 Bot 时，如果微信账号未关联到任何 Hub 用户，会自动创建用户
+
+<Callout type="info">
+自动创建的用户可以在后续登录后补充密码或绑定 Passkey，以便在不同设备上使用不同的认证方式。
+</Callout>
+
+## 下一步
+
+- 了解 App 开发：[App 开发](/docs/hub/apps)
+- 了解部署配置：[部署指南](/docs/hub/deployment)
+- 查看 API 参考：[API 参考](/docs/api)

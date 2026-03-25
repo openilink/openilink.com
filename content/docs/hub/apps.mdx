@@ -1,0 +1,268 @@
+---
+title: App 开发
+description: 开发第三方 App 扩展 OpeniLink Hub 的能力，通过 OAuth + 事件订阅 + Bot API 实现。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## App 是什么
+
+App 是可安装到 Bot 的第三方扩展应用。通过 App，开发者可以：
+
+- 接收 Bot 的消息事件
+- 通过 Bot API 发送消息和获取联系人信息
+- 扩展 Bot 的功能（如自动回复、数据统计、CRM 对接等）
+
+App 与 Channel 的区别在于：Channel 是消息的路由和分发通道，App 是功能扩展单元。一个 Bot 可以同时拥有多个 Channel 和多个 App。
+
+## 创建 App
+
+在 Hub 控制台中创建 App，需要定义以下信息：
+
+### 基本信息
+
+- **名称**：App 的显示名称
+- **描述**：App 功能的简要说明
+- **图标**：App 图标（可选）
+
+### Tools（能力声明）
+
+声明 App 需要使用的 Bot API 能力：
+
+```json
+{
+  "tools": [
+    "messages.send",
+    "contacts.list",
+    "bot.info"
+  ]
+}
+```
+
+### Events（事件订阅）
+
+声明 App 需要接收的事件类型：
+
+```json
+{
+  "events": [
+    "message.received",
+    "bot.status_changed"
+  ]
+}
+```
+
+### Scopes（权限范围）
+
+声明 App 请求的权限范围：
+
+```json
+{
+  "scopes": [
+    "bot:read",
+    "bot:write",
+    "contacts:read",
+    "messages:send"
+  ]
+}
+```
+
+## 安装流程
+
+App 安装到 Bot 的完整流程：
+
+```
+1. Bot 所有者在 Hub 中浏览可用 App
+       ↓
+2. 选择 App 并点击"安装"
+       ↓
+3. 确认 App 请求的权限范围
+       ↓
+4. Hub 生成 app_token 和 signing_secret
+       ↓
+5. 将 app_token 和 signing_secret 配置到 App 服务
+       ↓
+6. App 配置 request_url（用于接收事件推送）
+       ↓
+7. 安装完成，App 开始接收事件
+```
+
+### 安装后获得的凭证
+
+| 凭证 | 说明 |
+| --- | --- |
+| `app_token` | App 调用 Bot API 的认证令牌 |
+| `signing_secret` | 用于验证 Hub 推送事件的签名 |
+
+<Callout type="warn">
+`app_token` 和 `signing_secret` 仅在安装时显示一次，请妥善保存。如果丢失，需要重新生成。
+</Callout>
+
+### 配置 request_url
+
+`request_url` 是 App 接收事件推送的 HTTP 端点。Hub 会将事件以 POST 请求推送到该地址：
+
+```
+https://your-app.example.com/events/openilink
+```
+
+Hub 推送的事件请求包含签名 Header，App 应验证签名以确保请求来自 Hub：
+
+```
+X-OpeniLink-Signature: sha256=xxxx
+X-OpeniLink-Timestamp: 1711234567
+```
+
+## Bot API（App Token 认证）
+
+安装后的 App 可以通过 Bot API 与 Bot 交互。所有 Bot API 请求需要携带 `app_token`：
+
+```bash
+Authorization: Bearer <app_token>
+```
+
+### POST /bot/v1/messages/send
+
+发送消息。
+
+```bash
+curl -X POST https://hub.openilink.com/bot/v1/messages/send \
+  -H "Authorization: Bearer <app_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to_user_id": "wxid_xxx",
+    "content": "你好，这是来自 App 的消息",
+    "context_token": "ctx_xxx"
+  }'
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `to_user_id` | string | 是 | 接收者微信 ID |
+| `content` | string | 是 | 消息内容 |
+| `context_token` | string | 是 | 上下文令牌 |
+
+**响应：**
+
+```json
+{
+  "success": true,
+  "message_id": "msg_xxx"
+}
+```
+
+### GET /bot/v1/contacts
+
+获取 Bot 的联系人列表。
+
+```bash
+curl https://hub.openilink.com/bot/v1/contacts \
+  -H "Authorization: Bearer <app_token>"
+```
+
+**响应：**
+
+```json
+{
+  "contacts": [
+    {
+      "user_id": "wxid_xxx",
+      "user_name": "张三",
+      "remark": "备注名",
+      "avatar_url": "https://..."
+    }
+  ]
+}
+```
+
+### GET /bot/v1/bot
+
+获取当前 Bot 的基本信息。
+
+```bash
+curl https://hub.openilink.com/bot/v1/bot \
+  -H "Authorization: Bearer <app_token>"
+```
+
+**响应：**
+
+```json
+{
+  "bot_id": "bot_xxx",
+  "name": "我的 Bot",
+  "status": "online",
+  "wx_id": "wxid_xxx",
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```
+
+## 事件日志
+
+Hub 记录 App 接收事件的完整日志，方便调试：
+
+- 每个事件推送的请求详情（URL、Header、Body）
+- 响应状态码和耗时
+- 推送失败时的错误信息和重试记录
+
+在 Hub 控制台的 App 详情页可以查看事件日志。
+
+## API 日志
+
+App 调用 Bot API 的所有请求也会被记录：
+
+- 请求方法、路径、参数
+- 响应状态码和耗时
+- 错误详情（如认证失败、参数错误等）
+
+## OAuth 流程
+
+对于需要用户授权的 App（如需要访问用户的其他 Bot），可以使用 OAuth 流程：
+
+### 授权流程
+
+```
+1. App 引导用户跳转到 Hub 授权页面
+   GET /api/auth/oauth/authorize?client_id=APP_ID&redirect_uri=CALLBACK&scope=bot:read
+       ↓
+2. 用户在 Hub 确认授权
+       ↓
+3. Hub 回调到 App 的 redirect_uri，携带授权码
+   GET CALLBACK?code=AUTH_CODE
+       ↓
+4. App 用授权码换取 access_token
+   POST /api/auth/oauth/token
+       ↓
+5. App 使用 access_token 调用用户授权范围内的 API
+```
+
+### 换取 Token
+
+```bash
+curl -X POST https://hub.openilink.com/api/auth/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "code": "AUTH_CODE",
+    "client_id": "APP_ID",
+    "client_secret": "APP_SECRET",
+    "redirect_uri": "CALLBACK"
+  }'
+```
+
+**响应：**
+
+```json
+{
+  "access_token": "at_xxx",
+  "token_type": "bearer",
+  "expires_in": 3600
+}
+```
+
+## 下一步
+
+- 了解消息追踪：[消息追踪](/docs/hub/tracing)
+- 查看完整 API 端点：[API 参考](/docs/api)
+- 了解 WebSocket 接入：[WebSocket 接入](/docs/hub/websocket)

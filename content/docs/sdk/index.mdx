@@ -1,0 +1,62 @@
+---
+title: SDK 总览
+description: OpeniLink 提供 6 种语言官方 SDK，覆盖 Node.js、PHP、Go、Python、C# 与 Java。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+OpeniLink 已经在多个运行时上展开 SDK 布局。当前组织下共有 6 个公开 SDK 仓库，覆盖 Node.js、PHP、Go、Python、C# 与 Java。它们的成熟度并不完全一致，但已经构成了统一的接入入口矩阵。
+
+## SDK 列表
+
+| 运行时 | 仓库 | 安装命令 | 状态 |
+| --- | --- | --- | --- |
+| Node.js | [openilink-sdk-node](https://github.com/openilink/openilink-sdk-node) | `npm install openilink-sdk-node` | 可用 |
+| PHP | [openilink-sdk-php](https://github.com/openilink/openilink-sdk-php) | `composer require openilink/openilink-sdk-php` | 可用 |
+| Go | [openilink-sdk-go](https://github.com/openilink/openilink-sdk-go) | `go get github.com/openilink/openilink-sdk-go` | 开发中 |
+| Python | [openilink-sdk-python](https://github.com/openilink/openilink-sdk-python) | `pip install openilink-sdk-python` | 开发中 |
+| C# | [openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp) | `dotnet add package OpeniLink.Sdk` | 开发中 |
+| Java | [openilink-sdk-java](https://github.com/openilink/openilink-sdk-java) | Maven/Gradle 依赖 | 开发中 |
+
+## 共同能力
+
+官方 SDK 当前围绕同一组核心任务逐步对齐：
+
+- **二维码登录流程**：生成二维码 → 用户扫码 → 确认登录 → 获得会话
+- **长轮询消息更新**：持续轮询入站消息，回调处理每条消息
+- **文本消息发送**：向指定用户发送文本消息
+- **会话配置获取**：获取当前会话的 Bot 和 Channel 配置
+- **打字状态更新**：向对方发送"正在输入"状态提示
+- **上传 URL 获取**：获取文件上传的预签名 URL（用于发送图片、文件等）
+- **Context Token 缓存与主动推送**：缓存消息中的 context token，后续用于主动向用户发送消息
+
+## Context Token 说明
+
+<Callout type="info">
+Context Token 是微信通过 iLink 协议返回的会话凭证，有效期为 **24 小时**。
+
+**重要**：首次接入时，你无法主动获取 context token。只有当用户向 Bot 发送消息后，该消息中才会包含 context token。获得后应立即缓存，后续可使用该 token 主动向用户发送消息（在 24 小时有效期内）。
+</Callout>
+
+Context Token 的生命周期：
+
+1. 用户向 Bot 发送消息
+2. 消息中携带 `context_token` 字段
+3. SDK 或开发者缓存该 token
+4. 在 24 小时内，可使用该 token 主动向用户发送消息
+5. 过期后需要等待用户再次发送消息获取新的 token
+
+## 如何选择运行时
+
+- 如果你的栈是 JavaScript 或 TypeScript，优先使用 [Node.js SDK](/docs/sdk/node)。
+- 如果你的栈是 PHP 或 Composer 项目，优先使用 [PHP SDK](/docs/sdk/php)。
+- 如果你的栈偏向 Go，可以先看 [Go SDK](/docs/sdk/go)。
+- 如果你的栈偏向 Python，可以先看 [Python SDK](/docs/sdk/python)。
+- 如果你的栈偏向 .NET，可以先看 [C# SDK](/docs/sdk/csharp)。
+- 如果你的栈偏向 Java，可以先看 [Java SDK](/docs/sdk/java)。
+
+Node.js 和 PHP SDK 提供了更完整的文档和示例，如果你的项目允许，建议优先选择这两个运行时。其余运行时的 SDK 正在积极开发中，会持续补充文档和示例。
+
+## 文档覆盖范围
+
+当前站点已经为全部 6 个公开 SDK 仓库提供入口，其中 Node.js 与 PHP 给出更细的接入说明，其余运行时先提供统一索引与定位说明，后续可随着仓库成熟度继续展开。

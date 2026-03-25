@@ -1,0 +1,90 @@
+---
+title: Hub 概览
+description: OpeniLink Hub 是微信 Bot 消息管理的核心平台，提供多 Bot 管理、三通道分发和完善的控制台。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Hub 是什么
+
+OpeniLink Hub 是集中管理微信 Bot 的开源平台。它提供一个功能完整的 Web 控制台，让你在一个地方完成 Bot 绑定、Channel 路由配置、消息查看和追踪等所有操作。
+
+Hub 是 OpeniLink 生态的核心中枢——SDK 和外部服务通过 Hub 暴露的 API 和 WebSocket 接口与微信 Bot 交互。
+
+在线体验：[hub.openilink.com](https://hub.openilink.com)
+
+## 核心能力
+
+### 多 Bot 管理
+
+- 支持同时绑定和管理多个微信 Bot
+- 扫码绑定，即扫即上线
+- 实时查看 Bot 在线/离线状态
+- Bot 支持安装第三方 App 扩展
+
+### Channel 精细路由
+
+- 每个 Bot 下可创建多个 Channel
+- 每个 Channel 有独立的 API Key
+- 支持消息过滤规则，精确控制哪些消息进入该 Channel
+- Channel 是 SDK 和 API 接入的最小单元
+
+### 三通道消息分发
+
+每个 Channel 支持三种消息分发方式，可同时启用：
+
+| 通道 | 延迟 | 适用场景 |
+| --- | --- | --- |
+| **WebSocket** | 毫秒级 | 实时消息处理、交互式 Bot |
+| **Webhook** | 秒级 | 对接已有 HTTP 服务、异步处理 |
+| **AI 自动回复** | 秒级 | 智能对话、自动客服 |
+
+### Passkey 无密码登录 + OAuth
+
+- 支持 Passkey (WebAuthn) 生物识别认证
+- 支持 GitHub、LinuxDo OAuth 登录
+- 支持传统用户名/密码认证
+- 支持微信扫码登录
+
+### Webhook 插件市场
+
+- 内置 JavaScript 插件引擎（基于 goja）
+- 支持两阶段钩子：请求前处理（onRequest）和响应后处理（onResponse）
+- 插件市场：提交、审核、安装
+- 沙盒执行，安全隔离
+
+### App 平台
+
+- 第三方开发者可创建 App
+- App 安装到 Bot 后获得独立的 API 访问权限
+- 支持事件订阅和 Bot API 调用
+- 完整的 OAuth 授权流程
+
+### 消息追踪和日志
+
+- 完整的消息追踪链路：inbound → webhook → ai → outbound
+- 每个步骤记录成功/失败/跳过状态
+- Webhook 请求/响应详情日志
+- API 调用日志
+
+## 技术规格
+
+| 指标 | 数值 |
+| --- | --- |
+| 后端语言 | Go |
+| 后端代码行数 | 39,000+ 行 |
+| API 端点数量 | 103 个 |
+| 前端框架 | React 19 |
+| 数据库 | PostgreSQL 17 |
+| 对象存储 | MinIO (S3 兼容) |
+| 容器化 | Docker / Docker Compose |
+
+## 快速导航
+
+- [部署指南](/docs/hub/deployment) — 使用 Docker Compose 一键部署
+- [WebSocket 接入](/docs/hub/websocket) — 实时消息收发协议
+- [Webhook 与插件](/docs/hub/webhook) — HTTP 回调和 JavaScript 插件引擎
+- [AI 自动回复](/docs/hub/ai-reply) — 集成 OpenAI 兼容 API
+- [认证方式](/docs/hub/authentication) — Passkey、OAuth 和扫码登录
+- [App 开发](/docs/hub/apps) — 第三方应用扩展
+- [消息追踪](/docs/hub/tracing) — 调试和诊断消息流程

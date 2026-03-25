@@ -1,0 +1,175 @@
+---
+title: AI 自动回复
+description: 集成 OpenAI 兼容 API，为微信 Bot 启用智能自动回复。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 概述
+
+OpeniLink Hub 内置 AI 自动回复功能，支持集成任何 OpenAI 兼容的 API 服务。当 Channel 启用 AI 后，收到的微信消息会自动发送到 AI 模型处理，并将生成的回复发送给用户。
+
+## 配置方式
+
+AI 配置支持两种层级：
+
+### 全局配置（管理员）
+
+管理员可以设置全局 AI 配置，作为所有 Channel 的默认 AI 服务：
+
+1. 使用管理员账号登录 Hub
+2. 进入管理面板 → AI 配置
+3. 填写 API 参数
+
+或者通过环境变量设置：
+
+```bash
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=sk-xxxxx
+AI_MODEL=gpt-4
+```
+
+### Channel 级自定义配置
+
+每个 Channel 可以独立配置 AI 参数，覆盖全局设置：
+
+```json
+{
+  "ai_config": {
+    "enabled": true,
+    "source": "custom",
+    "base_url": "https://api.anthropic.com/v1",
+    "api_key": "sk-ant-xxxxx",
+    "model": "claude-3-sonnet-20240229",
+    "system_prompt": "你是一个友好的客服助手，用简洁的中文回答问题。",
+    "max_history": 10
+  }
+}
+```
+
+## 支持的 API 服务
+
+Hub 的 AI 模块兼容任何遵循 OpenAI Chat Completions API 格式的服务，包括但不限于：
+
+| 服务 | Base URL | 模型示例 |
+| --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4`、`gpt-4o`、`gpt-3.5-turbo` |
+| Anthropic (兼容层) | 取决于代理服务 | `claude-3-opus`、`claude-3-sonnet` |
+| 本地模型 (Ollama) | `http://localhost:11434/v1` | `llama3`、`qwen2` |
+| 其他 OpenAI 兼容服务 | 自定义 | 自定义 |
+
+## 配置项说明
+
+| 配置项 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `enabled` | boolean | 是 | 是否启用 AI 自动回复 |
+| `source` | string | 是 | AI 配置来源：`"builtin"` 使用全局配置，`"custom"` 使用自定义配置 |
+| `base_url` | string | 自定义时必填 | OpenAI 兼容 API 的基础 URL |
+| `api_key` | string | 自定义时必填 | API 密钥 |
+| `model` | string | 自定义时必填 | 模型名称 |
+| `system_prompt` | string | 否 | 系统提示词，定义 AI 的角色和行为 |
+| `max_history` | number | 否 | 发送给 AI 的历史消息条数上限，默认 10 |
+
+## source 选项
+
+| 值 | 说明 |
+| --- | --- |
+| `"builtin"` | 使用管理员配置的全局 AI 服务。Channel 只需设置 `enabled: true` 和 `source: "builtin"` 即可启用 |
+| `"custom"` | 使用 Channel 自定义的 AI 配置。需要额外提供 `base_url`、`api_key`、`model` 等参数 |
+
+<Callout type="info">
+使用 `"builtin"` 可以避免在每个 Channel 中重复配置 API 参数。管理员只需配置一次全局 AI，所有选择 `"builtin"` 的 Channel 共享同一配置。
+</Callout>
+
+## 会话历史管理
+
+AI 回复时会携带该用户的历史对话上下文，以提供连贯的对话体验：
+
+- Hub 为每个用户与 Bot 的会话维护独立的消息历史
+- 最多保存 **20 条** 最近的消息（用户消息 + AI 回复）
+- 历史消息按时间顺序组织为 `messages` 数组发送给 AI
+- 超过上限的早期消息会被自动移除
+- `max_history` 配置可以进一步限制发送给 AI 的历史条数（不超过 20）
+
+### 消息格式
+
+发送给 AI 的消息列表示例：
+
+```json
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "system",
+      "content": "你是一个友好的客服助手。"
+    },
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！有什么可以帮助你的？"
+    },
+    {
+      "role": "user",
+      "content": "我想了解一下你们的产品"
+    }
+  ]
+}
+```
+
+## 启用方式
+
+### 使用全局配置
+
+在 Channel 配置中设置：
+
+```json
+{
+  "ai_config": {
+    "enabled": true,
+    "source": "builtin"
+  }
+}
+```
+
+<Callout type="warn">
+使用 `"builtin"` 前，需要确保管理员已配置全局 AI 服务。否则 AI 回复将因缺少配置而失败。
+</Callout>
+
+### 使用自定义配置
+
+在 Channel 配置中设置完整参数：
+
+```json
+{
+  "ai_config": {
+    "enabled": true,
+    "source": "custom",
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "sk-xxxxx",
+    "model": "gpt-4",
+    "system_prompt": "你是一个专业的技术支持助手，请用中文简洁回答。遇到不确定的问题请如实告知。",
+    "max_history": 15
+  }
+}
+```
+
+## 与其他 Sink 的协同
+
+AI 自动回复可以与 WebSocket 和 Webhook 同时启用：
+
+- **AI + WebSocket**：消息同时推送到 WebSocket 客户端和 AI 处理，两者独立运行
+- **AI + Webhook**：消息同时推送到 Webhook URL 和 AI 处理
+- **AI + Webhook + WebSocket**：三个通道并行工作
+
+<Callout type="info">
+如果 Webhook 插件在 onRequest 中调用了 `ctx.reply()` 并 `ctx.skip()`，AI 仍然会独立收到消息并处理。三个 Sink 是并行分发的，互不影响。
+</Callout>
+
+## 下一步
+
+- 了解认证方式：[认证方式](/docs/hub/authentication)
+- 配置 Webhook 插件：[Webhook 与插件](/docs/hub/webhook)
+- 查看消息追踪：[消息追踪](/docs/hub/tracing)

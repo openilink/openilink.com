@@ -1,0 +1,4 @@
+{
+  "title": "Hub 平台",
+  "pages": ["index", "deployment", "websocket", "webhook", "ai-reply", "authentication", "apps", "tracing"]
+}

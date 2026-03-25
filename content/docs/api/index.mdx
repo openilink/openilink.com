@@ -1,0 +1,336 @@
+---
+title: API 参考
+description: OpeniLink Hub 完整的 REST API 端点参考。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+OpeniLink Hub 提供 103 个 REST API 端点，覆盖认证、Bot 管理、Channel 操作、Webhook 插件、App 开发和管理功能。本页列出所有可用端点。
+
+<Callout type="info">
+除特别标注外，所有 API 端点都需要通过 Session Cookie 或 API Key 进行认证。管理员 API 需要管理员权限。Bot API 使用 App Token 认证。
+</Callout>
+
+## 认证 API
+
+用户注册、登录和认证相关端点。
+
+### 密码认证
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/auth/register` | 用户名密码注册 | 无 |
+| POST | `/api/auth/login` | 用户名密码登录 | 无 |
+| POST | `/api/auth/logout` | 退出登录 | Session |
+
+### Passkey (WebAuthn)
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/auth/passkey/register/begin` | 开始 Passkey 注册 | 无 |
+| POST | `/api/auth/passkey/register/finish` | 完成 Passkey 注册 | 无 |
+| POST | `/api/auth/passkey/login/begin` | 开始 Passkey 登录 | 无 |
+| POST | `/api/auth/passkey/login/finish` | 完成 Passkey 登录 | 无 |
+| GET | `/api/auth/passkey/list` | 获取已注册的 Passkey 列表 | Session |
+| DELETE | `/api/auth/passkey/{id}` | 删除指定 Passkey | Session |
+
+### OAuth
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/auth/oauth/github` | 发起 GitHub OAuth 登录 | 无 |
+| GET | `/api/auth/callback/github` | GitHub OAuth 回调 | 无 |
+| GET | `/api/auth/oauth/linuxdo` | 发起 LinuxDo OAuth 登录 | 无 |
+| GET | `/api/auth/callback/linuxdo` | LinuxDo OAuth 回调 | 无 |
+
+### 扫码登录
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/auth/qr/generate` | 生成扫码登录二维码 | 无 |
+| GET | `/api/auth/qr/status` | 查询扫码登录状态（WebSocket 升级） | 无 |
+| POST | `/api/auth/qr/confirm` | 确认扫码登录 | 无 |
+
+### 会话
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/auth/me` | 获取当前用户信息 | Session |
+| GET | `/api/auth/sessions` | 获取活跃 Session 列表 | Session |
+| DELETE | `/api/auth/sessions/{id}` | 删除指定 Session | Session |
+
+## Bot 管理 API
+
+Bot 的绑定、管理和消息发送。
+
+### Bot 生命周期
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/bots` | 获取当前用户的 Bot 列表 | Session |
+| GET | `/api/bots/{id}` | 获取指定 Bot 详情 | Session |
+| DELETE | `/api/bots/{id}` | 删除指定 Bot | Session |
+| POST | `/api/bots/bind/start` | 开始绑定 Bot（生成二维码） | Session |
+| POST | `/api/bots/bind/confirm` | 确认绑定 Bot | Session |
+| GET | `/api/bots/{id}/status` | 获取 Bot 在线状态 | Session |
+| POST | `/api/bots/{id}/reconnect` | 重新连接 Bot | Session |
+
+### Bot 消息
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/bots/{id}/send` | 通过 Bot 发送消息 | Session |
+| GET | `/api/bots/{id}/messages` | 获取 Bot 的消息列表 | Session |
+| GET | `/api/bots/{id}/contacts` | 获取 Bot 的联系人 | Session |
+
+### Bot 追踪
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/bots/{id}/traces` | 获取消息追踪列表 | Session |
+| GET | `/api/bots/{id}/traces/{traceId}` | 获取追踪详情 | Session |
+
+## Channel API
+
+通过 API Key 认证的 Channel 操作端点，供 SDK 和外部服务使用。
+
+### WebSocket 连接
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/v1/channels/connect` | 建立 WebSocket 连接 | API Key |
+
+### 消息操作
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/v1/channels/messages` | 获取 Channel 消息列表（长轮询） | API Key |
+| POST | `/api/v1/channels/send` | 通过 Channel 发送消息 | API Key |
+| POST | `/api/v1/channels/typing` | 发送打字状态 | API Key |
+
+### Channel 配置
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/v1/channels/config` | 获取 Channel 配置 | API Key |
+| GET | `/api/v1/channels/upload-url` | 获取文件上传预签名 URL | API Key |
+| POST | `/api/v1/channels/login/qr` | Channel 内扫码登录 | API Key |
+| GET | `/api/v1/channels/login/status` | 查询 Channel 内登录状态 | API Key |
+
+## Channel 管理 API
+
+Channel 的 CRUD 操作，通过 Session 认证。
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/bots/{id}/channels` | 获取 Bot 下的 Channel 列表 | Session |
+| POST | `/api/bots/{id}/channels` | 创建新 Channel | Session |
+| GET | `/api/bots/{id}/channels/{channelId}` | 获取 Channel 详情 | Session |
+| PUT | `/api/bots/{id}/channels/{channelId}` | 更新 Channel 配置 | Session |
+| DELETE | `/api/bots/{id}/channels/{channelId}` | 删除 Channel | Session |
+| POST | `/api/bots/{id}/channels/{channelId}/regenerate-key` | 重新生成 API Key | Session |
+
+### Channel Sink 配置
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| PUT | `/api/bots/{id}/channels/{channelId}/websocket` | 配置 WebSocket Sink | Session |
+| PUT | `/api/bots/{id}/channels/{channelId}/webhook` | 配置 Webhook Sink | Session |
+| PUT | `/api/bots/{id}/channels/{channelId}/ai` | 配置 AI Sink | Session |
+| PUT | `/api/bots/{id}/channels/{channelId}/filter` | 配置消息过滤规则 | Session |
+
+## Webhook 插件 API
+
+Webhook 插件的管理和调试。
+
+### 插件市场
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/plugins` | 获取插件市场列表 | Session |
+| GET | `/api/plugins/{id}` | 获取插件详情 | Session |
+| POST | `/api/plugins` | 提交新插件 | Session |
+| PUT | `/api/plugins/{id}` | 更新插件 | Session |
+| DELETE | `/api/plugins/{id}` | 删除插件 | Session |
+
+### 插件安装
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/bots/{id}/channels/{channelId}/plugins/install` | 安装插件到 Channel | Session |
+| DELETE | `/api/bots/{id}/channels/{channelId}/plugins/{pluginId}` | 从 Channel 卸载插件 | Session |
+| GET | `/api/bots/{id}/channels/{channelId}/plugins` | 获取 Channel 已安装插件 | Session |
+
+### 插件调试
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/webhooks/{id}/debug/request` | 调试 onRequest 钩子 | Session |
+| POST | `/api/webhooks/{id}/debug/response` | 调试 onResponse 钩子 | Session |
+
+## App API
+
+第三方 App 的创建和管理。
+
+### App 管理
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/apps` | 获取 App 列表 | Session |
+| POST | `/api/apps` | 创建新 App | Session |
+| GET | `/api/apps/{id}` | 获取 App 详情 | Session |
+| PUT | `/api/apps/{id}` | 更新 App 信息 | Session |
+| DELETE | `/api/apps/{id}` | 删除 App | Session |
+
+### App 安装
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/api/bots/{id}/apps/install` | 安装 App 到 Bot | Session |
+| DELETE | `/api/bots/{id}/apps/{appId}` | 从 Bot 卸载 App | Session |
+| GET | `/api/bots/{id}/apps` | 获取 Bot 已安装的 App | Session |
+| POST | `/api/bots/{id}/apps/{appId}/regenerate-token` | 重新生成 App Token | Session |
+
+### App OAuth
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/auth/oauth/authorize` | App OAuth 授权页面 | Session |
+| POST | `/api/auth/oauth/token` | App OAuth 换取 Token | 无 |
+
+### App 事件和日志
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/bots/{id}/apps/{appId}/events` | 获取 App 事件日志 | Session |
+| GET | `/api/bots/{id}/apps/{appId}/api-logs` | 获取 App API 调用日志 | Session |
+
+## 用户管理 API
+
+用户个人信息和设置。
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/user/profile` | 获取用户资料 | Session |
+| PUT | `/api/user/profile` | 更新用户资料 | Session |
+| PUT | `/api/user/password` | 修改密码 | Session |
+| GET | `/api/user/oauth-accounts` | 获取关联的 OAuth 账号 | Session |
+| DELETE | `/api/user/oauth-accounts/{provider}` | 解绑 OAuth 账号 | Session |
+
+## 管理员 API
+
+需要管理员权限的系统管理端点。
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| GET | `/api/admin/users` | 获取所有用户列表 | 管理员 |
+| GET | `/api/admin/users/{id}` | 获取指定用户详情 | 管理员 |
+| PUT | `/api/admin/users/{id}` | 更新用户信息 | 管理员 |
+| DELETE | `/api/admin/users/{id}` | 删除用户 | 管理员 |
+| GET | `/api/admin/bots` | 获取所有 Bot 列表 | 管理员 |
+| GET | `/api/admin/stats` | 获取系统统计信息 | 管理员 |
+| GET | `/api/admin/ai-config` | 获取全局 AI 配置 | 管理员 |
+| PUT | `/api/admin/ai-config` | 更新全局 AI 配置 | 管理员 |
+| GET | `/api/admin/plugins/pending` | 获取待审核插件列表 | 管理员 |
+| POST | `/api/admin/plugins/{id}/approve` | 审核通过插件 | 管理员 |
+| POST | `/api/admin/plugins/{id}/reject` | 拒绝插件 | 管理员 |
+
+## Bot API（App Token 认证）
+
+供已安装的 App 使用的 Bot API。使用 App Token 进行认证。
+
+```
+Authorization: Bearer <app_token>
+```
+
+| 方法 | 路径 | 说明 | 认证 |
+| --- | --- | --- | --- |
+| POST | `/bot/v1/messages/send` | 发送消息 | App Token |
+| GET | `/bot/v1/contacts` | 获取联系人列表 | App Token |
+| GET | `/bot/v1/bot` | 获取 Bot 信息 | App Token |
+
+### POST /bot/v1/messages/send
+
+**请求体：**
+
+```json
+{
+  "to_user_id": "wxid_xxx",
+  "content": "消息内容",
+  "context_token": "ctx_xxx"
+}
+```
+
+**响应：**
+
+```json
+{
+  "success": true,
+  "message_id": "msg_xxx"
+}
+```
+
+### GET /bot/v1/contacts
+
+**响应：**
+
+```json
+{
+  "contacts": [
+    {
+      "user_id": "wxid_xxx",
+      "user_name": "张三",
+      "remark": "备注",
+      "avatar_url": "https://..."
+    }
+  ]
+}
+```
+
+### GET /bot/v1/bot
+
+**响应：**
+
+```json
+{
+  "bot_id": "bot_xxx",
+  "name": "我的 Bot",
+  "status": "online",
+  "wx_id": "wxid_xxx",
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```
+
+## 通用响应格式
+
+### 成功响应
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+### 错误响应
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_TOKEN",
+    "message": "认证令牌无效"
+  }
+}
+```
+
+### 常见错误码
+
+| 错误码 | HTTP 状态码 | 说明 |
+| --- | --- | --- |
+| `UNAUTHORIZED` | 401 | 未认证或认证已过期 |
+| `FORBIDDEN` | 403 | 权限不足 |
+| `NOT_FOUND` | 404 | 资源不存在 |
+| `INVALID_PARAMS` | 400 | 请求参数无效 |
+| `RATE_LIMITED` | 429 | 请求频率超限 |
+| `INTERNAL_ERROR` | 500 | 服务器内部错误 |

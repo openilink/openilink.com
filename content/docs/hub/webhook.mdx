@@ -1,0 +1,289 @@
+---
+title: Webhook 与插件
+description: HTTP 回调对接任意服务，内置 JavaScript 插件引擎支持两阶段钩子。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## 概述
+
+Webhook 是 OpeniLink Hub 的三种消息分发通道之一。当 Channel 收到新消息时，Hub 会将消息以 HTTP POST 的方式推送到你配置的 URL。结合内置的 JavaScript 插件引擎，你可以在消息发送前后执行自定义逻辑。
+
+## Webhook 基本配置
+
+在 Channel 设置中启用 Webhook，需要配置以下参数：
+
+### URL
+
+Webhook 接收端点的完整 URL，Hub 会向该地址发送 POST 请求。
+
+```
+https://your-service.example.com/webhook/openilink
+```
+
+### 认证方式
+
+支持三种认证方式：
+
+#### Bearer Token
+
+```
+Authorization: Bearer your-secret-token
+```
+
+#### 自定义 Header
+
+```
+X-Custom-Auth: your-secret-value
+```
+
+#### HMAC 签名
+
+Hub 使用配置的密钥对请求体进行 HMAC-SHA256 签名，签名值放在 `X-Signature` Header 中：
+
+```
+X-Signature: sha256=xxxx
+```
+
+接收端可以用相同的密钥验证签名，确保请求来自 Hub。
+
+## 请求负载格式
+
+Webhook 请求体为 JSON 格式：
+
+```json
+{
+  "type": "message",
+  "content": "你好",
+  "sender": {
+    "user_id": "wxid_xxx",
+    "user_name": "张三"
+  },
+  "sessionID": "sess_xxx",
+  "contextToken": "ctx_xxx",
+  "msg_type": 1,
+  "timestamp": 1711234567,
+  "bot_id": "bot_xxx",
+  "channel_id": "ch_xxx"
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `type` | string | 事件类型，当前固定为 `"message"` |
+| `content` | string | 消息内容 |
+| `sender.user_id` | string | 发送者微信 ID |
+| `sender.user_name` | string | 发送者昵称 |
+| `sessionID` | string | 会话 ID |
+| `contextToken` | string | 上下文令牌，用于回复消息 |
+| `msg_type` | number | 消息类型（1=文本, 3=图片, 等） |
+| `timestamp` | number | 消息时间戳（Unix 秒） |
+| `bot_id` | string | Bot ID |
+| `channel_id` | string | Channel ID |
+
+## JavaScript 插件引擎
+
+OpeniLink Hub 内置了基于 [goja](https://github.com/nicholasgasior/goja)（Go 实现的 JavaScript 引擎）的插件系统。插件可以在 Webhook 请求的两个阶段介入处理流程。
+
+### 两阶段钩子
+
+#### onRequest(ctx) — 请求前钩子
+
+在 Webhook 请求发送 **之前** 执行。可以用于：
+
+- 修改请求内容（URL、Header、Body）
+- 根据条件跳过本次 Webhook（调用 `ctx.skip()`）
+- 直接回复消息而不转发到 Webhook（调用 `ctx.reply()`）
+
+```javascript
+// 请求前钩子示例
+function onRequest(ctx) {
+  // 获取原始消息
+  const msg = ctx.msg;
+
+  // 如果消息包含特定关键词，直接回复
+  if (msg.content.includes("你好")) {
+    ctx.reply("你好！有什么可以帮助你的？");
+    ctx.skip(); // 跳过 Webhook 请求
+    return;
+  }
+
+  // 修改请求 Header
+  ctx.req.headers["X-Custom-Data"] = "extra-info";
+
+  // 修改请求 Body
+  ctx.req.body.extra_field = "附加数据";
+}
+```
+
+#### onResponse(ctx) — 响应后钩子
+
+在收到 Webhook 响应 **之后** 执行。可以用于：
+
+- 解析 Webhook 响应内容
+- 根据响应结果回复消息
+- 记录日志或执行后续操作
+
+```javascript
+// 响应后钩子示例
+function onResponse(ctx) {
+  // 获取 Webhook 响应
+  const res = ctx.res;
+
+  if (res.status === 200) {
+    const body = JSON.parse(res.body);
+
+    // 根据 Webhook 返回的内容回复用户
+    if (body.reply) {
+      ctx.reply(body.reply);
+    }
+  } else {
+    // Webhook 异常，回复默认消息
+    ctx.reply("系统暂时繁忙，请稍后再试。");
+  }
+}
+```
+
+### ctx 对象
+
+插件钩子函数接收的 `ctx` 对象包含以下属性和方法：
+
+| 属性/方法 | 类型 | 说明 |
+| --- | --- | --- |
+| `ctx.msg` | object | 原始消息对象（content, sender, sessionID 等） |
+| `ctx.req` | object | HTTP 请求对象（仅 onRequest 可修改） |
+| `ctx.req.url` | string | 请求 URL |
+| `ctx.req.headers` | object | 请求 Header |
+| `ctx.req.body` | object | 请求 Body |
+| `ctx.res` | object | HTTP 响应对象（仅 onResponse 可用） |
+| `ctx.res.status` | number | 响应状态码 |
+| `ctx.res.headers` | object | 响应 Header |
+| `ctx.res.body` | string | 响应 Body |
+| `ctx.reply(text)` | function | 直接回复消息给发送者 |
+| `ctx.skip()` | function | 跳过本次 Webhook 请求（仅 onRequest） |
+
+### 权限声明
+
+插件通过特殊注释声明权限和元数据：
+
+```javascript
+// ==UserScript==
+// @name         我的插件
+// @description  自动关键词回复插件
+// @version      1.0.0
+// @match        *
+// @connect      api.example.com
+// @grant        none
+// @timeout      3000
+// ==/UserScript==
+```
+
+| 声明 | 说明 |
+| --- | --- |
+| `@match` | 匹配规则，`*` 表示匹配所有消息 |
+| `@connect` | 允许插件访问的外部域名（多个用逗号分隔） |
+| `@grant` | 权限声明，当前支持 `none` |
+| `@timeout` | 插件执行超时时间（毫秒），默认 5000 |
+
+### 沙盒限制
+
+为了安全性，插件运行在严格的沙盒环境中：
+
+- **禁用 `eval` 和 `Function` 构造函数**：防止动态代码执行
+- **最大栈深度限制**：最多 1000 层，防止无限递归
+- **执行超时**：默认 5 秒，可通过 `@timeout` 自定义（最大不超过 10 秒）
+- **内存限制**：单次执行有内存上限
+- **网络访问限制**：只能访问 `@connect` 中声明的域名
+
+<Callout type="warn">
+插件代码在服务端执行，请谨慎审核第三方插件。Hub 提供了完善的沙盒隔离机制，但建议只安装来自可信来源的插件。
+</Callout>
+
+## 插件市场
+
+OpeniLink Hub 提供内置的插件市场，支持插件的完整生命周期管理。
+
+### 提交插件
+
+1. 编写插件代码，包含必要的元数据声明
+2. 在 Hub 控制台的"插件市场"中提交
+3. 填写插件名称、描述、版本等信息
+4. 提交审核
+
+### 审核流程
+
+- 管理员审核插件代码的安全性
+- 检查权限声明是否合理
+- 通过审核后，插件进入市场可供安装
+
+### 安装到 Channel
+
+1. 在 Channel 设置中打开"Webhook 插件"
+2. 浏览插件市场
+3. 选择并安装所需插件
+4. 每个 Channel 可安装多个插件，按顺序执行
+
+## 调试工具
+
+Hub 提供了插件调试 API，方便开发和测试：
+
+### 调试请求前钩子
+
+```
+POST /api/webhooks/{id}/debug/request
+```
+
+```json
+{
+  "script": "function onRequest(ctx) { ctx.reply('测试回复'); }",
+  "message": {
+    "content": "测试消息",
+    "sender": { "user_id": "test", "user_name": "测试用户" }
+  }
+}
+```
+
+### 调试响应后钩子
+
+```
+POST /api/webhooks/{id}/debug/response
+```
+
+```json
+{
+  "script": "function onResponse(ctx) { /* ... */ }",
+  "response": {
+    "status": 200,
+    "body": "{\"reply\": \"ok\"}"
+  }
+}
+```
+
+## 完整处理流程
+
+一条消息从接收到 Webhook 处理的完整流程：
+
+```
+1. Bot 收到微信消息
+       ↓
+2. 消息经过 Channel 过滤规则筛选
+       ↓
+3. 执行 onRequest 钩子（如已安装插件）
+   ├── 如果调用了 ctx.skip()，跳过后续步骤
+   └── 如果调用了 ctx.reply()，直接回复
+       ↓
+4. 发送 HTTP POST 到 Webhook URL
+       ↓
+5. 接收 Webhook 响应
+       ↓
+6. 执行 onResponse 钩子（如已安装插件）
+   └── 可根据响应内容调用 ctx.reply() 回复
+       ↓
+7. 记录追踪日志（请求/响应详情、执行时间）
+```
+
+## 下一步
+
+- 配置 AI 自动回复：[AI 自动回复](/docs/hub/ai-reply)
+- 了解消息追踪：[消息追踪](/docs/hub/tracing)
+- 查看 API 参考：[API 参考](/docs/api)
