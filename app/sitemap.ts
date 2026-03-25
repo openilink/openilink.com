@@ -1,51 +1,18 @@
 import type { MetadataRoute } from 'next';
+import { source } from '@/lib/source';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://openilink.com';
+  const base = 'https://openilink.com';
 
-  // 静态页面
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-  ];
-
-  // 文档页面
-  const docSlugs = [
-    '',
-    'guide',
-    'guide/quick-start',
-    'guide/architecture',
-    'hub',
-    'hub/deployment',
-    'hub/websocket',
-    'hub/webhook',
-    'hub/ai-reply',
-    'hub/authentication',
-    'hub/apps',
-    'hub/tracing',
-    'sdk',
-    'sdk/node',
-    'sdk/php',
-    'sdk/go',
-    'sdk/python',
-    'sdk/csharp',
-    'sdk/java',
-    'api',
-    'repositories',
-    'roadmap',
-    'community',
-  ];
-
-  const docPages: MetadataRoute.Sitemap = docSlugs.map((slug) => ({
-    url: `${baseUrl}/docs${slug ? `/${slug}` : ''}`,
+  const docPages = source.getPages().map((page) => ({
+    url: `${base}${page.url}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
-    priority: slug === '' ? 0.9 : 0.7,
+    priority: page.url === '/docs' ? 0.9 : 0.7,
   }));
 
-  return [...staticPages, ...docPages];
+  return [
+    { url: base, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+    ...docPages,
+  ];
 }

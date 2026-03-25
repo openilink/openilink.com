@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -20,10 +20,10 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run docs:build
+      - run: npx @opennextjs/cloudflare
 
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/.vitepress/dist --project-name openilink-com
+          command: deploy
