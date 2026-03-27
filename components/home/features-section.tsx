@@ -234,22 +234,6 @@ const features = [
     ),
     className: '',
   },
-  {
-    Icon: MessageCircle,
-    name: '微信 ClawBot 对话',
-    description: 'AI 自动回复无缝集成，在真实微信对话中即时响应。',
-    href: '/docs',
-    cta: '了解更多',
-    background: (
-      <img
-        src="/images/hub-3.png"
-        alt="ClawBot 对话"
-        className="absolute inset-0 h-full w-full object-cover opacity-40 transition-all duration-500 group-hover:scale-105 group-hover:opacity-60"
-        loading="lazy"
-      />
-    ),
-    className: '',
-  },
 ];
 
 export function FeaturesSection() {
