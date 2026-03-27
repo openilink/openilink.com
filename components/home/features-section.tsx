@@ -10,7 +10,6 @@ import {
   Bot,
   Webhook,
   Cpu,
-  Store,
   Activity,
 } from 'lucide-react';
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
@@ -95,36 +94,6 @@ const features = [
     className: 'md:col-span-2 lg:col-span-2',
   },
   {
-    Icon: Store,
-    name: '应用市场',
-    description: '内置 Bridge、OpenClaw 等应用，一键安装扩展 Bot 能力。支持第三方 App 开发与上架。',
-    href: '/docs/hub/apps',
-    cta: '了解更多',
-    background: (
-      <div className="flex h-full items-center justify-center p-6">
-        <div className="w-full max-w-xs space-y-2">
-          {[
-            { icon: '🔗', name: 'Bridge', desc: '双向桥接 Bot 与外部系统', tag: '内置' },
-            { icon: '🦞', name: 'OpenClaw', desc: '通过 OpenClaw 协议接入', tag: '内置' },
-            { icon: '⚡', name: 'Command Service', desc: '动态命令服务', tag: 'v1.0.0' },
-          ].map((app) => (
-            <div key={app.name} className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-950/80 px-3 py-2">
-              <span className="text-lg">{app.icon}</span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold text-neutral-300">{app.name}</span>
-                  <span className="rounded bg-[#07C160]/10 px-1.5 py-0.5 font-mono text-[9px] text-[#07C160]">{app.tag}</span>
-                </div>
-                <span className="font-mono text-[10px] text-neutral-600">{app.desc}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
-    className: '',
-  },
-  {
     Icon: Zap,
     name: 'WebSocket 实时推送',
     description: '毫秒级消息投递，全双工通信，支持断线自动重连。',
@@ -204,10 +173,10 @@ const features = [
     href: '/docs/hub/tracing',
     cta: '了解更多',
     background: (
-      <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-xs rounded-lg border border-neutral-800 bg-neutral-950/80 p-3">
-          <div className="mb-2 font-mono text-[10px] text-neutral-600">Trace Timeline</div>
-          <div className="space-y-1.5">
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="w-full max-w-md rounded-lg border border-neutral-800 bg-neutral-950/80 p-4">
+          <div className="mb-3 font-mono text-xs text-neutral-500">Trace Timeline</div>
+          <div className="space-y-2">
             {[
               { name: 'process_message', width: '65%', time: '2.86s' },
               { name: 'store', width: '5%', time: '<1ms' },
@@ -216,14 +185,14 @@ const features = [
               { name: 'Bot API send_reply', width: '8%', time: '', offset: '85%' },
             ].map((span) => (
               <div key={span.name} className="flex items-center gap-2">
-                <span className="w-28 shrink-0 truncate text-right font-mono text-[9px] text-neutral-500">{span.name}</span>
-                <div className="relative h-3 flex-1 rounded-sm bg-neutral-900">
+                <span className="w-32 shrink-0 truncate text-right font-mono text-[10px] text-neutral-500">{span.name}</span>
+                <div className="relative h-4 flex-1 rounded-sm bg-neutral-900">
                   <div
                     className="absolute top-0 h-full rounded-sm bg-[#07C160]/30"
                     style={{ width: span.width, left: span.offset || '0%' }}
                   />
                   {span.time && (
-                    <span className="absolute top-0 left-1 font-mono text-[8px] leading-3 text-neutral-400" style={{ left: span.offset || '2px' }}>{span.time}</span>
+                    <span className="absolute top-0.5 font-mono text-[9px] leading-3 text-neutral-300" style={{ left: `calc(${span.offset || '0%'} + 4px)` }}>{span.time}</span>
                   )}
                 </div>
               </div>
@@ -232,7 +201,7 @@ const features = [
         </div>
       </div>
     ),
-    className: '',
+    className: 'md:col-span-2 lg:col-span-2',
   },
 ];
 
@@ -242,9 +211,8 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Section 标题 */}
         <FadeIn className="mb-12">
-          <span className="mb-4 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[#07C160]">
+          <span className="mb-4 inline-block font-mono text-xs uppercase tracking-wider text-[#07C160]">
             消息管理平台
-            <span className="rounded-full bg-[#D86A33]/20 px-2 py-0.5 text-[10px] font-bold text-[#D86A33]">NEW: 应用市场 · 消息追踪 · 自动续期</span>
           </span>
           <HyperText
             as="h2"

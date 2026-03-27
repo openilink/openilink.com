@@ -56,7 +56,7 @@ const BentoCard = ({
     <div className="absolute inset-0">{background}</div>
 
     {/* 底部渐变遮罩 */}
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent" />
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-transparent" />
 
     {/* 内容区域 */}
     <div className="relative z-10 p-6">

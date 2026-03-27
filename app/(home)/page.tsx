@@ -1,6 +1,7 @@
 import { HeroSection } from '@/components/home/hero-section';
 import { IntroSection } from '@/components/home/intro-section';
 import { FeaturesSection } from '@/components/home/features-section';
+import { MarketplaceSection } from '@/components/home/marketplace-section';
 import { GlobeSection } from '@/components/home/globe-section';
 import { SDKSection } from '@/components/home/sdk-section';
 import { CTASection } from '@/components/home/cta-section';
@@ -11,6 +12,7 @@ export default function HomePage() {
       <HeroSection />
       <IntroSection />
       <FeaturesSection />
+      <MarketplaceSection />
       <GlobeSection />
       <SDKSection />
       <CTASection />
