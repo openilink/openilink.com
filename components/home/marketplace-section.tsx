@@ -1,58 +1,53 @@
 'use client';
 
-import { ArrowRight, Download, ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { HyperText } from '@/components/ui/hyper-text';
 import { FadeIn } from '@/components/ui/fade-in';
 import Link from 'next/link';
 
-const builtinApps = [
+// 用实际能力来展示，而不是抽象的技术描述
+const apps = [
+  {
+    icon: '📈',
+    name: '股票查询',
+    desc: '发送 /s 600519 查实时股价，支持 A 股、港股、美股、数字货币。',
+    commands: ['/s', '/ss', '/sus', '/shk', '/dp', '/b'],
+    from: 'Command Service',
+  },
+  {
+    icon: '🎨',
+    name: 'AI 图片生成',
+    desc: '发送 /gi 赛博朋克城市 即可生成图片，Bot 直接回复到微信对话。',
+    commands: ['/gi'],
+    from: 'Command Service',
+  },
+  {
+    icon: '💬',
+    name: 'AI 对话',
+    desc: '发送 /a 帮我写一封邮件，Bot 调用大模型回答问题。',
+    commands: ['/a'],
+    from: 'Command Service',
+  },
   {
     icon: '🔗',
-    name: 'Bridge',
-    slug: 'bridge',
-    desc: '双向桥接 Bot 与外部系统，通过 Webhook 或 WebSocket 接收和发送消息。',
-    tag: '内置',
+    name: '消息转发',
+    desc: '微信消息自动转发到 Telegram、飞书、Slack，或你自己的服务器。',
+    commands: [],
+    from: 'Bridge',
   },
   {
     icon: '🦞',
-    name: 'OpenClaw',
-    slug: 'openclaw',
-    desc: '通过 OpenClaw 协议接入 Bot，实现跨平台 AI Agent 消息互通。',
-    tag: '内置',
-  },
-];
-
-const marketplaceApps = [
-  {
-    icon: '⚡',
-    name: 'Command Service',
-    slug: 'command-service',
-    desc: '动态命令服务，支持 HP 查询、AI 对话、图片生成等 20+ 命令。',
-    version: 'v1.0.0',
-    commands: 20,
+    name: 'OpenClaw 接入',
+    desc: '让你的 OpenClaw AI Agent 直接通过微信对话，无需额外开发。',
+    commands: [],
+    from: 'OpenClaw',
   },
   {
     icon: '🔊',
-    name: 'Echo',
-    slug: 'echo',
-    desc: '回显消息和命令的测试 App，适合作为开发起步模板。',
-    version: 'v1.0.0',
-    commands: 3,
-  },
-];
-
-const highlights = [
-  {
-    title: '一键安装',
-    desc: '浏览应用市场，点击安装即可为 Bot 添加新能力，无需写代码。',
-  },
-  {
-    title: 'OAuth PKCE 授权',
-    desc: 'App 通过标准 OAuth 流程获取权限，安全可控，随时可撤销。',
-  },
-  {
-    title: '开发者友好',
-    desc: '提供完整的 App 开发文档和示例模板，支持 Webhook 和 WebSocket 两种接入方式。',
+    name: '自定义命令',
+    desc: '开发自己的 App 上架到市场，别人也能一键安装你的功能。',
+    commands: ['/echo', '/ping'],
+    from: 'Echo（开发模板）',
   },
 ];
 
@@ -63,7 +58,7 @@ export function MarketplaceSection() {
 
       <div className="relative mx-auto max-w-7xl px-6 md:px-10">
         {/* 标题 */}
-        <FadeIn className="mb-16">
+        <FadeIn className="mb-6">
           <span className="mb-4 inline-block font-mono text-xs uppercase tracking-wider text-[#D86A33]">
             App Marketplace
           </span>
@@ -74,125 +69,83 @@ export function MarketplaceSection() {
             startOnView
             animateOnHover
           >
-            应用市场
+            一键给 Bot 加功能
           </HyperText>
-          <p className="max-w-2xl text-neutral-400">
-            扫码绑定 Bot 后，在引导流程中一键安装你需要的应用。
-            内置应用开箱即用，社区应用持续扩展。也可以开发自己的 App 并上架到市场。
+          <p className="max-w-2xl text-lg text-neutral-400">
+            不用写代码。扫码绑定微信号后，在应用市场里点一下「安装」，
+            你的 Bot 就能查股票、生成图片、转发消息到 Telegram……
           </p>
         </FadeIn>
 
-        {/* 两列布局：内置应用 + 推荐应用 */}
-        <div className="mb-12 grid gap-8 lg:grid-cols-2">
-          {/* 内置应用 */}
-          <FadeIn>
-            <h3 className="mb-4 font-mono text-xs uppercase tracking-wider text-neutral-500">
-              内置应用
-            </h3>
-            <div className="space-y-3">
-              {builtinApps.map((app) => (
-                <div
-                  key={app.slug}
-                  className="group rounded-xl border border-neutral-800 bg-neutral-900/50 p-5 transition-colors hover:border-neutral-700"
-                >
-                  <div className="mb-3 flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 text-xl">
-                      {app.icon}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{app.name}</span>
-                        <span className="rounded-full bg-[#07C160]/10 px-2 py-0.5 font-mono text-[10px] font-medium text-[#07C160]">
-                          {app.tag}
-                        </span>
-                      </div>
-                      <span className="font-mono text-xs text-neutral-600">{app.slug}</span>
-                    </div>
-                  </div>
-                  <p className="text-sm leading-relaxed text-neutral-500">{app.desc}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-md border border-neutral-700 bg-neutral-800/50 px-3 py-1.5 font-mono text-xs text-neutral-400">
-                      <Download className="h-3 w-3" />
-                      安装
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </FadeIn>
-
-          {/* 推荐应用 */}
-          <FadeIn delay={0.15}>
-            <h3 className="mb-4 font-mono text-xs uppercase tracking-wider text-neutral-500">
-              推荐应用
-            </h3>
-            <div className="space-y-3">
-              {marketplaceApps.map((app) => (
-                <div
-                  key={app.slug}
-                  className="group rounded-xl border border-neutral-800 bg-neutral-900/50 p-5 transition-colors hover:border-neutral-700"
-                >
-                  <div className="mb-3 flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 text-xl">
-                      {app.icon}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{app.name}</span>
-                        <span className="rounded-full bg-neutral-800 px-2 py-0.5 font-mono text-[10px] text-neutral-400">
-                          {app.version}
-                        </span>
-                      </div>
-                      <span className="font-mono text-xs text-neutral-600">{app.commands} 个命令</span>
-                    </div>
-                  </div>
-                  <p className="text-sm leading-relaxed text-neutral-500">{app.desc}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-md border border-[#07C160]/30 bg-[#07C160]/10 px-3 py-1.5 font-mono text-xs text-[#07C160]">
-                      <Download className="h-3 w-3" />
-                      安装
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </FadeIn>
-        </div>
-
-        {/* 三个亮点 */}
-        <FadeIn delay={0.2}>
-          <div className="mb-10 grid gap-4 md:grid-cols-3">
-            {highlights.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-xl border border-neutral-800 bg-neutral-900/30 p-5"
-              >
-                <h4 className="mb-2 font-semibold text-white">{item.title}</h4>
-                <p className="text-sm leading-relaxed text-neutral-500">{item.desc}</p>
-              </div>
-            ))}
+        {/* 流程说明 */}
+        <FadeIn className="mb-12">
+          <div className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/50 px-4 py-2.5 text-sm text-neutral-400">
+            <span className="text-white">扫码绑定</span>
+            <span className="text-neutral-600">→</span>
+            <span className="text-white">打开应用市场</span>
+            <span className="text-neutral-600">→</span>
+            <span className="text-white">点击安装</span>
+            <span className="text-neutral-600">→</span>
+            <span className="text-[#07C160]">Bot 立刻获得新能力</span>
           </div>
         </FadeIn>
 
-        {/* 链接 */}
+        {/* App 卡片网格 */}
+        <div className="mb-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app, i) => (
+            <FadeIn key={app.name} delay={i * 0.08}>
+              <div className="group h-full rounded-xl border border-neutral-800 bg-neutral-900/50 p-5 transition-colors hover:border-[#D86A33]/30">
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 text-xl">
+                      {app.icon}
+                    </span>
+                    <span className="font-semibold text-white">{app.name}</span>
+                  </div>
+                </div>
+                <p className="mb-3 text-sm leading-relaxed text-neutral-400">{app.desc}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {app.commands.length > 0 && app.commands.slice(0, 3).map((cmd) => (
+                    <span
+                      key={cmd}
+                      className="rounded bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-neutral-400"
+                    >
+                      {cmd}
+                    </span>
+                  ))}
+                  <span className="ml-auto font-mono text-[10px] text-neutral-600">
+                    {app.from}
+                  </span>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+
+        {/* 底部提示 */}
         <FadeIn delay={0.3}>
-          <div className="flex flex-wrap items-center gap-6">
-            <Link
-              href="/docs/hub/apps"
-              className="inline-flex items-center gap-2 font-mono text-sm text-[#D86A33] transition-colors hover:underline"
-            >
-              App 开发文档
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="https://github.com/openilink/openilink-app-echo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 font-mono text-sm text-neutral-500 transition-colors hover:text-neutral-300"
-            >
-              查看示例 App
-              <ExternalLink className="h-4 w-4" />
-            </Link>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
+            <p className="text-sm text-neutral-500">
+              市场里的应用持续增加中。你也可以开发自己的 App 并上架。
+            </p>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/docs/guide/use-cases"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#D86A33] transition-colors hover:underline"
+              >
+                查看使用案例
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href="https://github.com/openilink/openilink-app-echo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+              >
+                开发模板
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </FadeIn>
       </div>

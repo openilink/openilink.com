@@ -23,14 +23,50 @@ const steps = [
   },
 ];
 
+// 用户真实痛点 → OpeniLink Hub 的解法
+const painPoints = [
+  {
+    icon: '📄',
+    pain: '没有官方文档，全靠社区逆向',
+    solution: '完善的中文文档 + 7 种语言 SDK，不用看协议也能上手',
+  },
+  {
+    icon: '🔑',
+    pain: 'context_token 复杂，消息经常发不出去',
+    solution: 'SDK 自动处理 token，你只管收消息、发回复',
+  },
+  {
+    icon: '⏰',
+    pain: '24 小时过期掉线，重要消息丢了',
+    solution: '自动续期，提前续约不掉线；消息持久化不丢失',
+  },
+  {
+    icon: '🖼️',
+    pain: '发张图片要处理 CDN 上传 + AES 加密',
+    solution: '一行代码发图片、视频、文件，SDK 搞定加密',
+  },
+  {
+    icon: '🖥️',
+    pain: '只能用命令行，管不了多个 Bot',
+    solution: 'Web 控制台，扫码绑定、在线监控、消息追踪',
+  },
+  {
+    icon: '🔌',
+    pain: '想接 AI + 转发 + 实时推送，得自己拼',
+    solution: '三个通道开箱即用，装个 App 就能加新功能',
+  },
+];
+
+// 与同类项目的核心差异
 const comparisons = [
-  { feature: '部署方式', hub: '一行命令安装，零依赖', traditional: '需要复杂的依赖配置' },
-  { feature: '数据库', hub: '内置 SQLite（零配置）+ 可选 PostgreSQL', traditional: '必须配置外部数据库' },
-  { feature: '多 Bot 管理', hub: '扫码绑定，集中管理', traditional: '通常只支持单个' },
-  { feature: '消息下发', hub: 'WebSocket + Webhook + AI 并行', traditional: '单一通道' },
-  { feature: '会话续期', hub: '自动续期，避免 24h 窗口过期掉线', traditional: '手动处理或无法续期' },
-  { feature: '可扩展性', hub: 'JS 插件 + 应用市场 + 7 种 SDK', traditional: '硬编码' },
-  { feature: '开源协议', hub: 'MIT，无商业限制', traditional: '部分闭源' },
+  { feature: '定位', hub: '完整消息管理平台', others: 'SDK / Agent 桥接器' },
+  { feature: 'Web 管理后台', hub: '完整控制台 + 消息追踪', others: '无 / 仅配置面板' },
+  { feature: '消息分发', hub: 'WebSocket + Webhook + AI 并行', others: '单一通道或无' },
+  { feature: 'SDK 生态', hub: '7 种语言官方 SDK', others: '1~4 种语言' },
+  { feature: '扩展能力', hub: '应用市场 + JS 插件引擎', others: '硬编码 / 无插件' },
+  { feature: '部署方式', hub: '一行命令，内置 SQLite 零配置', others: '需要外部数据库或 Docker' },
+  { feature: 'OpenClaw 依赖', hub: '完全独立（可选适配）', others: '部分强依赖 OpenClaw' },
+  { feature: '开源协议', hub: 'MIT，无商业限制', others: '部分闭源或限制' },
 ];
 
 export function IntroSection() {
@@ -75,18 +111,56 @@ export function IntroSection() {
           ))}
         </div>
 
-        {/* 对比表格 */}
-        <div className="mb-12 max-w-3xl">
-          <h3 className="mb-6 font-mono text-xs uppercase tracking-wider text-neutral-600">
-            为什么选择 OpeniLink Hub？
+        {/* 痛点 → 解法 */}
+        <div className="mb-20">
+          <h3 className="mb-3 text-xl font-bold text-white">
+            用 iLink 开发遇到过这些问题吗？
           </h3>
+          <p className="mb-8 text-sm text-neutral-500">Hub 帮你把这些坑都填了。</p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {painPoints.map((item, i) => (
+              <FadeIn
+                key={i}
+                delay={i * 0.08}
+                className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/60 p-5 transition-all duration-300 hover:border-neutral-700 hover:bg-neutral-900/80"
+              >
+                {/* 顶部图标 */}
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800/80 text-lg transition-transform duration-300 group-hover:scale-110">
+                  {item.icon}
+                </div>
+                {/* 痛点 */}
+                <p className="mb-3 text-sm leading-relaxed text-neutral-500">
+                  <span className="mr-1 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-red-400/60" />
+                  {item.pain}
+                </p>
+                {/* 分割线 */}
+                <div className="mb-3 h-px bg-gradient-to-r from-[#07C160]/20 via-[#07C160]/5 to-transparent" />
+                {/* 解法 */}
+                <p className="text-sm font-medium leading-relaxed text-neutral-200">
+                  <span className="mr-1 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-[#07C160]" />
+                  {item.solution}
+                </p>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+
+        {/* 对比表格 */}
+        <div className="mb-12 max-w-4xl">
+          <h3 className="mb-6 font-mono text-xs uppercase tracking-wider text-neutral-600">
+            与同类开源项目对比
+          </h3>
+          <p className="mb-6 text-sm text-neutral-500">
+            目前 GitHub 上有不少 iLink 相关项目（WeClaw、wechatbot、weixin-bot 等），
+            但大多数只是 SDK 或 Agent 桥接工具。Hub 是目前唯一带<span className="text-neutral-300">管理后台 + 应用市场 + 多通道分发</span>的完整平台。
+          </p>
           <div className="overflow-hidden rounded-xl border border-neutral-800">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-neutral-800 bg-neutral-900/80">
-                  <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-wider text-neutral-500">特性</th>
+                  <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-wider text-neutral-500">对比维度</th>
                   <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-wider text-[#07C160]">OpeniLink Hub</th>
-                  <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-wider text-neutral-600">传统方案</th>
+                  <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-wider text-neutral-600">其他方案</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,7 +168,7 @@ export function IntroSection() {
                   <tr key={row.feature} className="border-b border-neutral-800/50 last:border-0">
                     <td className="px-4 py-3 text-neutral-400">{row.feature}</td>
                     <td className="px-4 py-3 font-mono text-xs text-neutral-200">{row.hub}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-neutral-600">{row.traditional}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-neutral-600">{row.others}</td>
                   </tr>
                 ))}
               </tbody>
