@@ -1,49 +1,50 @@
 'use client';
 
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { type ReactNode } from 'react';
+import { ArrowRight, ExternalLink, TrendingUp, Paintbrush, MessageSquare, Forward, Terminal } from 'lucide-react';
 import { HyperText } from '@/components/ui/hyper-text';
 import { FadeIn } from '@/components/ui/fade-in';
 import Link from 'next/link';
 
 // 用实际能力来展示，而不是抽象的技术描述
-const apps = [
+const apps: { icon: ReactNode; name: string; desc: string; commands: string[]; from: string }[] = [
   {
-    icon: '📈',
+    icon: <TrendingUp className="h-5 w-5 text-[#D86A33]" />,
     name: '股票查询',
     desc: '发送 /s 600519 查实时股价，支持 A 股、港股、美股、数字货币。',
     commands: ['/s', '/ss', '/sus', '/shk', '/dp', '/b'],
     from: 'Command Service',
   },
   {
-    icon: '🎨',
+    icon: <Paintbrush className="h-5 w-5 text-[#D86A33]" />,
     name: 'AI 图片生成',
-    desc: '发送 /gi 赛博朋克城市 即可生成图片，Bot 直接回复到微信对话。',
+    desc: '发送 /gi 赛博朋克城市 即可生成图片，Bot 直接回复到微信。',
     commands: ['/gi'],
     from: 'Command Service',
   },
   {
-    icon: '💬',
+    icon: <MessageSquare className="h-5 w-5 text-[#D86A33]" />,
     name: 'AI 对话',
     desc: '发送 /a 帮我写一封邮件，Bot 调用大模型回答问题。',
     commands: ['/a'],
     from: 'Command Service',
   },
   {
-    icon: '🔗',
+    icon: <Forward className="h-5 w-5 text-[#D86A33]" />,
     name: '消息转发',
-    desc: '微信消息自动转发到 Telegram、飞书、Slack，或你自己的服务器。',
+    desc: '微信消息自动转发到 Telegram、飞书、Slack 或自己的服务器。',
     commands: [],
     from: 'Bridge',
   },
   {
-    icon: '🦞',
+    icon: <span className="text-lg">🦞</span>,
     name: 'OpenClaw 接入',
-    desc: '让你的 OpenClaw AI Agent 直接通过微信对话，无需额外开发。',
+    desc: '让 OpenClaw AI Agent 直接通过微信对话，无需额外开发。',
     commands: [],
     from: 'OpenClaw',
   },
   {
-    icon: '🔊',
+    icon: <Terminal className="h-5 w-5 text-[#D86A33]" />,
     name: '自定义命令',
     desc: '开发自己的 App 上架到市场，别人也能一键安装你的功能。',
     commands: ['/echo', '/ping'],
@@ -97,7 +98,7 @@ export function MarketplaceSection() {
               <div className="group h-full rounded-xl border border-neutral-800 bg-neutral-900/50 p-5 transition-colors hover:border-[#D86A33]/30">
                 <div className="mb-3 flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 text-xl">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800">
                       {app.icon}
                     </span>
                     <span className="font-semibold text-white">{app.name}</span>

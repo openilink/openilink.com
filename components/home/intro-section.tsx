@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
+import { type ReactNode } from 'react';
+import { ArrowRight, FileText, KeyRound, Clock, Image, Monitor, Plug } from 'lucide-react';
 import { HyperText } from '@/components/ui/hyper-text';
 import { FadeIn } from '@/components/ui/fade-in';
 import Link from 'next/link';
@@ -24,34 +25,34 @@ const steps = [
 ];
 
 // 用户真实痛点 → OpeniLink Hub 的解法
-const painPoints = [
+const painPoints: { icon: ReactNode; pain: string; solution: string }[] = [
   {
-    icon: '📄',
+    icon: <FileText className="h-5 w-5 text-neutral-400" />,
     pain: '没有官方文档，全靠社区逆向',
-    solution: '完善的中文文档 + 7 种语言 SDK，不用看协议也能上手',
+    solution: '完善中文文档 + 7 种语言 SDK，无需了解协议',
   },
   {
-    icon: '🔑',
+    icon: <KeyRound className="h-5 w-5 text-neutral-400" />,
     pain: 'context_token 复杂，消息经常发不出去',
     solution: 'SDK 自动处理 token，你只管收消息、发回复',
   },
   {
-    icon: '⏰',
+    icon: <Clock className="h-5 w-5 text-neutral-400" />,
     pain: '24 小时过期掉线，重要消息丢了',
     solution: '自动续期，提前续约不掉线；消息持久化不丢失',
   },
   {
-    icon: '🖼️',
+    icon: <Image className="h-5 w-5 text-neutral-400" />,
     pain: '发张图片要处理 CDN 上传 + AES 加密',
     solution: '一行代码发图片、视频、文件，SDK 搞定加密',
   },
   {
-    icon: '🖥️',
+    icon: <Monitor className="h-5 w-5 text-neutral-400" />,
     pain: '只能用命令行，管不了多个 Bot',
     solution: 'Web 控制台，扫码绑定、在线监控、消息追踪',
   },
   {
-    icon: '🔌',
+    icon: <Plug className="h-5 w-5 text-neutral-400" />,
     pain: '想接 AI + 转发 + 实时推送，得自己拼',
     solution: '三个通道开箱即用，装个 App 就能加新功能',
   },
@@ -125,7 +126,7 @@ export function IntroSection() {
                 className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/60 p-5 transition-all duration-300 hover:border-neutral-700 hover:bg-neutral-900/80"
               >
                 {/* 顶部图标 */}
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800/80 text-lg transition-transform duration-300 group-hover:scale-110">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800/80 transition-transform duration-300 group-hover:scale-110">
                   {item.icon}
                 </div>
                 {/* 痛点 */}
