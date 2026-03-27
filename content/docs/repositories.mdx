@@ -3,7 +3,7 @@ title: 仓库
 description: openilink 组织全部公开仓库索引。
 ---
 
-下面是 `openilink` 组织当前公开的仓库列表。这个页面用于把官网、Hub、SDK 与生态项目放到同一个索引面里，避免入口分散。当前同步到的公开仓库总数为 10 个，其中 SDK 仓库为 6 个。
+下面是 `openilink` 组织当前公开的仓库列表。这个页面用于把官网、Hub、App 生态、渠道集成、插件市场、SDK 放到同一个索引里，避免入口分散。当前同步到的公开仓库总数为 17 个，其中 SDK 仓库为 7 个。
 
 ## 全部仓库
 
@@ -11,33 +11,56 @@ description: openilink 组织全部公开仓库索引。
 | --- | --- | --- | --- |
 | [openilink/openilink.com](https://github.com/openilink/openilink.com) | 官网 | - | OpeniLink 官方网站与文档中心 |
 | [openilink/openilink-hub](https://github.com/openilink/openilink-hub) | 中枢服务 | Go | 面向平台中枢能力的仓库 |
-| [openilink/openilink-tg](https://github.com/openilink/openilink-tg) | 生态集成 | Go | Telegram 相关集成方向 |
+| [openilink/openilink-app-echo](https://github.com/openilink/openilink-app-echo) | Hub App | Go | Hub App 开发示例，最小化的 echo App，演示完整 App 生命周期（manifest 注册、OAuth PKCE 安装、webhook 事件处理） |
+| [openilink/openilink-app-command-service](https://github.com/openilink/openilink-app-command-service) | Hub App | Go | 命令服务桥接 App，将外部命令服务动态注册到 Hub |
+| [openilink/openilink-app-bh](https://github.com/openilink/openilink-app-bh) | Hub App | Go | 单命令 App 示例 |
+| [openilink/openilink-tg](https://github.com/openilink/openilink-tg) | 渠道集成 | Go | Telegram 相关集成方向 |
+| [openilink/openclaw-channels](https://github.com/openilink/openclaw-channels) | 渠道集成 | TypeScript | OpenClaw 的 OpeniLink 渠道插件，让 OpenClaw 通过 Hub 收发微信消息 |
+| [openilink/openclaw-channel-openilink](https://github.com/openilink/openclaw-channel-openilink) | 渠道集成 | - | OpenClaw 渠道相关集成仓库（旧版，参见 openclaw-channels） |
 | [openilink/openilink-sdk-node](https://github.com/openilink/openilink-sdk-node) | SDK | TypeScript | Node.js / TypeScript SDK |
 | [openilink/openilink-sdk-php](https://github.com/openilink/openilink-sdk-php) | SDK | PHP | PHP SDK |
 | [openilink/openilink-sdk-go](https://github.com/openilink/openilink-sdk-go) | SDK | Go | Go SDK |
 | [openilink/openilink-sdk-python](https://github.com/openilink/openilink-sdk-python) | SDK | Python | Python SDK |
 | [openilink/openilink-sdk-csharp](https://github.com/openilink/openilink-sdk-csharp) | SDK | C# | .NET / C# SDK |
 | [openilink/openilink-sdk-java](https://github.com/openilink/openilink-sdk-java) | SDK | Java | Java SDK |
-| [openilink/openclaw-channel-openilink](https://github.com/openilink/openclaw-channel-openilink) | 渠道集成 | - | OpenClaw 渠道相关集成仓库 |
+| [openilink/openilink-sdk-lua](https://github.com/openilink/openilink-sdk-lua) | SDK | Lua | Lua SDK |
+| [openilink/openilink-webhook-plugins](https://github.com/openilink/openilink-webhook-plugins) | 插件市场 | JavaScript | 官方 Webhook 插件仓库，社区贡献的开箱即用插件 |
 
 ## 结构理解
 
-目前可以把这些仓库理解为四层：
+目前可以把这些仓库理解为五层：
 
-- 官网层：`openilink.com`
-- 中枢层：`openilink-hub`
-- 渠道 / 生态层：`openilink-tg`、`openclaw-channel-openilink`
-- SDK 层：6 个不同运行时的接入包
+1. **官方站点**：`openilink.com` — 官网与文档中心
+2. **Hub 核心**：`openilink-hub` — 平台中枢服务
+3. **Hub App 生态**：`openilink-app-echo`、`openilink-app-command-service`、`openilink-app-bh` — 围绕 Hub 的 App 开发示例与工具
+4. **渠道与集成**：`openilink-tg`、`openclaw-channels`、`openclaw-channel-openilink` — 对接外部平台的渠道插件
+5. **SDK 层**：7 个不同运行时的接入包
 
 ## 按类别看
 
-### 官网
+### 官方站点
 
 - `openilink.com`
 
-### Hub 与中枢
+### Hub 核心
 
 - `openilink-hub`
+
+### Hub App 生态
+
+- `openilink-app-echo` — 最小化 echo App，演示完整 App 生命周期
+- `openilink-app-command-service` — 命令服务桥接 App
+- `openilink-app-bh` — 单命令 App 示例
+
+### 渠道与集成
+
+- `openilink-tg` — Telegram 集成
+- `openclaw-channels` — OpenClaw 的 OpeniLink 渠道插件（TypeScript）
+- `openclaw-channel-openilink` — OpenClaw 渠道集成（旧版）
+
+### 插件市场
+
+- `openilink-webhook-plugins` — 官方 Webhook 插件仓库
 
 ### SDK
 
@@ -47,15 +70,12 @@ description: openilink 组织全部公开仓库索引。
 - `openilink-sdk-python`
 - `openilink-sdk-csharp`
 - `openilink-sdk-java`
-
-### 渠道与生态
-
-- `openilink-tg`
-- `openclaw-channel-openilink`
+- `openilink-sdk-lua`
 
 ## 使用建议
 
 - 如果你想直接进入平台表面，先打开 [Hub](https://hub.openilink.com)。
+- 如果你要开发 Hub App，从 `openilink-app-echo` 示例开始，了解完整的 App 生命周期。
 - 如果你要开始接入，优先从 [SDK 总览](/docs/sdk/) 进入。
 - 如果你要了解组织全貌，优先从当前页面浏览所有仓库。
 - 如果你要参与文档或品牌层建设，直接查看 `openilink.com`。

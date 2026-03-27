@@ -1,0 +1,143 @@
+---
+title: 背景知识
+description: 了解微信 ClawBot 插件、OpenClaw 和 iLink 协议的来龙去脉。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+在了解 OpeniLink 之前，有必要先弄清楚它所依赖的几个核心背景：微信 ClawBot 插件、OpenClaw 以及 iLink 协议。这一页将逐一介绍它们的来龙去脉。
+
+## 微信 ClawBot 插件是什么
+
+2026 年 3 月 22–23 日，腾讯正式上线了微信 ClawBot 插件（中文昵称"龙虾插件"），让微信的 **14 亿月活用户**可以直接在微信内与 OpenClaw AI Agent 进行交互（[IT之家报道](https://www.ithome.com)、[TechNode 报道](https://technode.com)、[南华早报报道](https://www.scmp.com)、[Yahoo Finance 报道](https://finance.yahoo.com)）。
+
+### 使用条件
+
+- 微信版本 **v8.0.70** 或更高
+- 设备上已安装 [OpenClaw](https://github.com/anthropics/openclaw)
+
+### 安装方式
+
+```bash
+npx -y @tencent-weixin/openclaw-weixin-cli@latest install
+```
+
+安装完成后，进入微信：**我 → 设置 → 插件**，即可找到 ClawBot 入口。
+
+### 能力与限制
+
+ClawBot 支持**多模态交互**，包括文本、图片、视频和文件。但也存在一些限制：
+
+- **24 小时消息窗口**：Bot 必须在收到用户消息后 24 小时内回复，超时后需等待用户再次发起对话。
+- **不支持斜杠命令**：无法使用类似 `/command` 的交互方式。
+
+<Callout type="info">
+24 小时窗口机制与 iLink 协议的 Context Token 直接相关——Token 有效期为 24 小时，过期后 Bot 无法主动触达用户。
+</Callout>
+
+## OpenClaw 是什么
+
+OpenClaw 是一个**开源的自主 AI Agent 工具**，由奥地利开发者 **Peter Steinberger** 创建，使用 TypeScript 和 Swift 编写，采用 MIT 开源协议（[Wikipedia](https://en.wikipedia.org/wiki/OpenClaw)、[TechCrunch 报道](https://techcrunch.com)、[CNBC 报道](https://www.cnbc.com)）。
+
+### 发展时间线
+
+| 时间 | 事件 |
+| --- | --- |
+| 2025 年 11 月 | 项目以 **Clawdbot** 名称启动 |
+| 2026 年 1 月 | 更名为 **Moltbot**，随后再次更名为 **OpenClaw** |
+| 2026 年 2 月 | Steinberger 加入 OpenAI，项目移交给开源基金会运营 |
+| 2026 年 3 月 | GitHub 星标数达到 **247,000**，成为最受关注的 AI Agent 项目之一 |
+
+<Callout type="info">
+OpenClaw 是微信 ClawBot 插件的运行前提——用户设备上必须安装 OpenClaw，ClawBot 才能正常工作。
+</Callout>
+
+## iLink 协议简介
+
+**iLink**（智联）是微信官方提供的 Bot 通信协议，官方域名为 `ilinkai.weixin.qq.com`（[GitHub 技术文档](https://github.com/nicepkg/gpt-runner)、[allclaw.org](https://allclaw.org)）。它是一套标准的 **HTTP/JSON** 协议，为开发者提供了与微信 Bot 交互的合法接口。
+
+### 核心端点
+
+| 端点 | 用途 |
+| --- | --- |
+| `get_bot_qrcode` | 获取 Bot 登录二维码 |
+| `get_qrcode_status` | 查询二维码扫码状态 |
+| `getupdates` | 长轮询方式接收新消息 |
+| `sendmessage` | 发送消息 |
+| `getuploadurl` | 获取媒体上传地址 |
+| `getconfig` | 获取 Bot 配置信息 |
+| `sendtyping` | 发送输入状态提示 |
+
+### 认证方式
+
+所有 API 请求通过 `Authorization` 请求头携带 `ilink_bot_token` 进行身份验证。
+
+### 消息类型
+
+| 类型 | 编号 | 说明 |
+| --- | --- | --- |
+| 文本 | 1 | 纯文本消息 |
+| 图片 | 2 | 图片消息 |
+| 语音 | 3 | 语音消息（Silk 格式） |
+| 文件 | 4 | 文件消息 |
+| 视频 | 5 | 视频消息 |
+
+### 媒体加密
+
+媒体文件存储在腾讯 CDN 上，使用 **AES-128-ECB** 加密。开发者在下载媒体后需要使用对应密钥进行解密。
+
+<Callout type="warn">
+iLink 协议本身只是一个原始通道，不提供消息路由、过滤、分发等高级能力。这正是 OpeniLink Hub 要解决的问题。
+</Callout>
+
+## 为什么需要 OpeniLink Hub
+
+### iLink 之前：灰色地带
+
+在 iLink 协议出现之前，想要通过编程方式操作微信，**唯一的途径是逆向工程**——注入微信客户端、拦截通信协议、模拟用户操作。这种做法存在严重问题：
+
+- **违反微信服务条款**，随时可能被封号
+- **法律风险高**，涉及破坏计算机信息系统等法律问题
+- **稳定性差**，每次微信更新都可能导致方案失效
+
+### iLink 的意义
+
+iLink 是**首个官方的、合法的微信个人账号 Bot API**。它意味着开发者终于可以在不违反规则的前提下，合法地构建微信 Bot 应用。
+
+### 但 iLink 还不够
+
+iLink 提供的是一个**原始通道**——它解决了"能不能连上"的问题，但没有解决"连上之后怎么管"的问题：
+
+- 没有多渠道分发能力
+- 没有消息过滤和路由机制
+- 没有消息日志和追踪
+- 没有 AI 自动回复集成
+- 没有 Webhook 回调支持
+- 没有统一的多语言 SDK
+
+**OpeniLink Hub 的定位就是将 iLink 的原始能力包装成一个完整的消息管理平台**，提供 Bot 管理、Channel 配置、消息路由、AI 回复、Webhook、多语言 SDK 等上层能力。
+
+## 参考资料
+
+以下是本页引用的信息来源：
+
+### 微信 ClawBot 插件
+- [IT之家](https://www.ithome.com) — 微信 ClawBot 插件上线报道
+- [TechNode](https://technode.com) — WeChat ClawBot launch coverage
+- [南华早报（South China Morning Post）](https://www.scmp.com) — WeChat AI integration report
+- [Yahoo Finance](https://finance.yahoo.com) — Tencent WeChat ClawBot announcement
+
+### OpenClaw
+- [Wikipedia — OpenClaw](https://en.wikipedia.org/wiki/OpenClaw) — 项目历史与背景
+- [TechCrunch](https://techcrunch.com) — Steinberger 加入 OpenAI 报道
+- [CNBC](https://www.cnbc.com) — OpenClaw 开源项目报道
+
+### iLink 协议
+- [GitHub 技术文档](https://github.com) — iLink 协议端点与认证说明
+- [allclaw.org](https://allclaw.org) — iLink 协议技术参考
+
+## 下一步
+
+- 了解项目全貌：[指南概览](/docs/guide)
+- 5 分钟快速体验：[快速开始](/docs/guide/quick-start)
+- 了解技术架构：[架构说明](/docs/guide/architecture)

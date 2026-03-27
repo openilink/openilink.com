@@ -1,0 +1,539 @@
+---
+title: 使用案例
+description: 从零开始了解 OpeniLink Hub 的常见使用场景和实战案例。
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+本页面整理了 OpeniLink Hub 最常见的五个使用场景，每个场景都从零开始讲解，适合完全没有接触过的新手用户。
+
+<Callout type="info">
+阅读本页之前，建议先完成 [快速开始](/docs/guide/quick-start) 中的基础部署和微信 Bot 绑定。如果你已经完成了，可以直接跳到感兴趣的案例。
+</Callout>
+
+---
+
+## 案例一：消息转发到其他平台
+
+**场景**：你希望把微信收到的消息，自动转发到 Telegram、Slack、飞书等其他平台，实现跨平台消息同步。
+
+这是 OpeniLink 最核心的能力——**1 个 Bot 对 N 个渠道**。下面以转发到 Telegram 为例，一步步说明。
+
+### 转发到 Telegram
+
+<Steps>
+<Step>
+
+#### 部署 Hub
+
+如果你还没有部署 Hub，一行命令即可完成：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openilink/openilink-hub/main/install.sh | sh
+```
+
+启动服务：
+
+```bash
+oih
+```
+
+打开浏览器访问 `http://localhost:9800`，注册账号（首个用户自动成为管理员）。
+
+</Step>
+<Step>
+
+#### 绑定微信 Bot
+
+在 Hub 控制台中点击 **"绑定 Bot"**，用微信扫描页面上显示的二维码，在微信客户端确认登录。Bot 上线后，Hub 就可以接收微信消息了。
+
+建议同时在 Bot 列表页设置 **自动续期**（如"提前 1h"），这样 Hub 会在微信 24 小时窗口过期前自动续期，避免 Bot 意外掉线。
+
+</Step>
+<Step>
+
+#### 使用 openilink-tg 转发到 Telegram
+
+[openilink-tg](https://github.com/openilink/openilink-tg) 是官方提供的 Telegram 桥接服务，可以把微信消息实时同步到 Telegram。
+
+首先，克隆并运行 openilink-tg：
+
+```bash
+git clone https://github.com/openilink/openilink-tg.git
+cd openilink-tg
+```
+
+配置环境变量，填入你的 Hub 地址和 Telegram Bot Token：
+
+```bash
+# Hub 的地址
+OPENILINK_HUB_URL=http://localhost:9800
+
+# 你的 Channel API Key（在 Hub 控制台创建 Channel 后获取）
+OPENILINK_API_KEY=your-channel-api-key
+
+# Telegram Bot Token（通过 @BotFather 创建）
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+
+# 接收消息的 Telegram Chat ID
+TELEGRAM_CHAT_ID=your-chat-id
+```
+
+启动服务后，微信收到的消息就会自动转发到你的 Telegram 频道或群组。
+
+</Step>
+</Steps>
+
+### 转发到飞书 / Slack（使用 Webhook 插件）
+
+如果你的目标平台是飞书或 Slack，可以通过 Hub 的 **Webhook 插件** 实现。原理是：Hub 收到微信消息后，通过 HTTP POST 推送到飞书/Slack 的 Incoming Webhook 地址。
+
+<Steps>
+<Step>
+
+#### 创建 Channel 并开启 Webhook
+
+在 Hub 控制台为你的 Bot 创建一个 Channel，在 Channel 设置中启用 Webhook，填写飞书或 Slack 的 Incoming Webhook URL。
+
+</Step>
+<Step>
+
+#### 编写 Webhook 插件格式化消息
+
+飞书和 Slack 对消息格式有特定要求，你可以用 Hub 的 JavaScript 插件在发送前修改请求体。
+
+以飞书为例：
+
+```javascript
+// 飞书 Webhook 插件示例
+function onRequest(ctx) {
+  const msg = ctx.msg;
+
+  // 将消息格式转换为飞书 Incoming Webhook 要求的格式
+  ctx.req.body = {
+    msg_type: "text",
+    content: {
+      text: `[微信] ${msg.sender.user_name}: ${msg.content}`
+    }
+  };
+}
+```
+
+以 Slack 为例：
+
+```javascript
+// Slack Webhook 插件示例
+function onRequest(ctx) {
+  const msg = ctx.msg;
+
+  // 将消息格式转换为 Slack Incoming Webhook 要求的格式
+  ctx.req.body = {
+    text: `*[微信] ${msg.sender.user_name}*: ${msg.content}`
+  };
+}
+```
+
+在 Hub 控制台的 Channel → Webhook 插件中粘贴上述代码即可。
+
+</Step>
+</Steps>
+
+<Callout type="info">
+Webhook 插件运行在 Hub 服务端的沙盒环境中，支持 `onRequest`（请求前）和 `onResponse`（响应后）两个钩子。详细说明请参考 [Webhook 与插件](/docs/hub/webhook)。
+</Callout>
+
+---
+
+## 案例二：AI 自动客服
+
+**场景**：你希望微信 Bot 收到消息后，自动调用 AI 大模型生成回复，实现 7×24 小时无人值守的智能客服。
+
+Hub 内置了 AI 自动回复功能，支持接入任何兼容 OpenAI Chat Completions API 格式的大模型，包括 GPT-4、Claude、DeepSeek、通义千问、Ollama 本地模型等。
+
+<Steps>
+<Step>
+
+#### 部署 Hub 并绑定 Bot
+
+如果还没部署，请参考 [快速开始](/docs/guide/quick-start) 完成 Hub 的安装和微信 Bot 绑定。
+
+</Step>
+<Step>
+
+#### 配置 AI 服务
+
+有两种配置方式，任选其一：
+
+**方式一：全局配置（推荐新手）**
+
+用管理员账号登录 Hub，进入 **管理面板 → AI 配置**，填写：
+
+| 配置项 | 示例值 | 说明 |
+| --- | --- | --- |
+| Base URL | `https://api.openai.com/v1` | AI 服务的 API 地址 |
+| API Key | `sk-xxxxx` | 你的 API 密钥 |
+| Model | `gpt-4` | 要使用的模型名称 |
+
+或者通过环境变量设置（适合命令行用户）：
+
+```bash
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=sk-xxxxx
+AI_MODEL=gpt-4
+```
+
+**方式二：Channel 级自定义配置**
+
+如果你需要不同的 Channel 使用不同的 AI 模型（比如一个用 GPT-4，另一个用 DeepSeek），可以在 Channel 设置中单独配置：
+
+```json
+{
+  "ai_config": {
+    "enabled": true,
+    "source": "custom",
+    "base_url": "https://api.deepseek.com/v1",
+    "api_key": "sk-xxxxx",
+    "model": "deepseek-chat",
+    "system_prompt": "你是一个友好的客服助手，请用简洁的中文回答问题。遇到不确定的问题请如实告知。",
+    "max_history": 10
+  }
+}
+```
+
+</Step>
+<Step>
+
+#### 启用 AI 自动回复
+
+在 Channel 设置中开启 AI 自动回复：
+
+- 如果你用的是全局配置，只需设置 `source` 为 `"builtin"`
+- 如果你用的是自定义配置，设置 `source` 为 `"custom"` 并填写完整参数
+
+开启后，用户发送的每条消息都会自动交给 AI 处理，并将 AI 的回复发送给用户。Hub 会自动维护每个用户的对话上下文（最多 20 条历史消息），让 AI 具备连续对话能力。
+
+</Step>
+</Steps>
+
+<Callout type="info">
+AI 自动回复可以和 WebSocket、Webhook 同时启用，三个通道并行工作互不影响。这意味着你可以一边用 AI 自动回复用户，一边把消息转发到其他平台。
+</Callout>
+
+**支持的 AI 服务一览**：
+
+| 服务 | Base URL | 模型示例 |
+| --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4`、`gpt-4o`、`gpt-3.5-turbo` |
+| Anthropic（兼容层） | 取决于代理服务 | `claude-3-opus`、`claude-3-sonnet` |
+| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat`、`deepseek-reasoner` |
+| 本地模型（Ollama） | `http://localhost:11434/v1` | `llama3`、`qwen2` |
+| 其他 OpenAI 兼容服务 | 自定义 | 自定义 |
+
+更多细节请参考 [AI 自动回复](/docs/hub/ai-reply)。
+
+---
+
+## 案例三：用 SDK 开发自定义 Bot
+
+**场景**：你是一个开发者，希望用代码完全掌控 Bot 的行为逻辑——收到什么消息、做什么处理、回复什么内容，全部由你决定。
+
+OpeniLink 提供 **6 种语言的官方 SDK**：Node.js、PHP、Go、Python、C#、Java，让你用熟悉的语言快速接入。
+
+### Node.js 完整示例
+
+下面是一个完整的 Node.js Bot 示例：收到用户消息后，识别关键词并执行不同的操作。
+
+```bash
+npm install openilink-sdk-node
+```
+
+```ts
+import { Client, extractText } from "openilink-sdk-node";
+
+// 第一步：使用 Channel API Key 初始化客户端
+// API Key 可以在 Hub 控制台创建 Channel 后获取
+const client = new Client("<你的 API Key>");
+
+// 第二步：扫码登录
+const result = await client.loginWithQr({
+  on_qrcode: (url) => {
+    // 这里会打印二维码链接，用微信扫描即可
+    console.log("请用微信扫描此二维码:", url);
+  },
+});
+
+if (!result.connected) {
+  console.error("登录失败:", result.message);
+  process.exit(1);
+}
+
+console.log("Bot 已上线，开始监听消息...");
+
+// 第三步：监听消息并处理
+await client.monitor(async (message) => {
+  // 提取消息中的文本内容
+  const text = extractText(message);
+  if (!text) return; // 非文本消息跳过
+
+  const userId = String(message.from_user_id);
+  const contextToken = String(message.context_token);
+
+  console.log(`收到消息: ${text}`);
+
+  // 根据关键词执行不同逻辑
+  if (text.includes("你好")) {
+    // 简单关键词回复
+    await client.sendText(userId, "你好！有什么可以帮助你的？", contextToken);
+  } else if (text.includes("帮助")) {
+    // 发送帮助菜单
+    await client.sendText(
+      userId,
+      "可用命令：\n1. 你好 - 打招呼\n2. 帮助 - 查看帮助\n3. 时间 - 查看当前时间",
+      contextToken
+    );
+  } else if (text.includes("时间")) {
+    // 动态生成回复内容
+    const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+    await client.sendText(userId, `当前时间: ${now}`, contextToken);
+  } else {
+    // 默认回复
+    await client.sendText(userId, `收到你的消息: ${text}`, contextToken);
+  }
+});
+```
+
+### Python 示例
+
+Python SDK 的使用方式与 Node.js 类似：
+
+```bash
+pip install openilink-sdk-python
+```
+
+```python
+from openilink_sdk import Client, extract_text
+
+# 初始化客户端
+client = Client("<你的 API Key>")
+
+# 扫码登录
+result = client.login_with_qr(
+    on_qrcode=lambda url: print(f"请用微信扫描此二维码: {url}")
+)
+
+if not result.connected:
+    raise Exception(result.message)
+
+print("Bot 已上线，开始监听消息...")
+
+# 监听并处理消息
+def on_message(message):
+    text = extract_text(message)
+    if not text:
+        return
+    # 回复消息
+    client.send_text(
+        str(message.from_user_id),
+        f"收到: {text}",
+        str(message.context_token)
+    )
+
+client.monitor(on_message)
+```
+
+<Callout type="info">
+目前 Node.js 和 PHP SDK 文档最完整，其他语言的 SDK 正在积极开发中。完整的 SDK 列表和选择建议请参考 [SDK 总览](/docs/sdk)。
+</Callout>
+
+**全部 SDK 一览**：
+
+| 运行时 | 安装命令 | 状态 |
+| --- | --- | --- |
+| Node.js | `npm install openilink-sdk-node` | 可用 |
+| PHP | `composer require openilink/openilink-sdk-php` | 可用 |
+| Go | `go get github.com/openilink/openilink-sdk-go` | 开发中 |
+| Python | `pip install openilink-sdk-python` | 开发中 |
+| C# | `dotnet add package OpeniLink.Sdk` | 开发中 |
+| Java | Maven/Gradle 依赖 | 开发中 |
+| Lua | 从源码引入 | 可用 |
+
+---
+
+## 案例四：开发 Hub App 扩展
+
+**场景**：你希望开发一个可安装到任意 Bot 的第三方扩展应用，比如自动统计消息数量、对接 CRM 系统、关键词告警等。
+
+Hub App 是 OpeniLink 的扩展机制。与直接用 SDK 写代码不同，App 是一个独立的服务，通过 OAuth 授权安装到 Bot 上，通过事件推送接收消息，通过 Bot API 执行操作。
+
+### 用 openilink-app-echo 作为起步模板
+
+官方提供了一个最简单的 App 示例——**Echo App**，它收到消息后原样回复。你可以用它作为起点快速开发自己的 App。
+
+<Steps>
+<Step>
+
+#### 理解 App 的基本结构
+
+一个 Hub App 需要以下几个部分：
+
+| 组成部分 | 说明 |
+| --- | --- |
+| **App 声明** | 在 Hub 控制台注册 App，声明名称、描述、所需权限（Scopes）、订阅的事件（Events）和使用的接口（Tools） |
+| **事件接收端点** | 一个 HTTP 服务，用于接收 Hub 推送的事件（如 `message.received`） |
+| **Bot API 调用** | 使用安装时获得的 `app_token` 调用 Bot API（如发送消息、获取联系人） |
+
+</Step>
+<Step>
+
+#### 创建一个 Echo App
+
+以 Node.js 为例，实现一个最简单的 Echo App：
+
+```ts
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+// 安装 App 后获得的凭证
+const APP_TOKEN = "your-app-token";
+const HUB_URL = "http://localhost:9800";
+
+// 接收 Hub 推送的事件
+app.post("/events/openilink", async (req, res) => {
+  const event = req.body;
+
+  // 只处理消息事件
+  if (event.type === "message.received") {
+    const { content, sender, context_token } = event.data;
+
+    // 调用 Bot API 回复消息
+    await fetch(`${HUB_URL}/bot/v1/messages/send`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${APP_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to_user_id: sender.user_id,
+        content: `Echo: ${content}`,
+        context_token: context_token,
+      }),
+    });
+  }
+
+  res.json({ ok: true });
+});
+
+app.listen(3000, () => {
+  console.log("Echo App 运行在 http://localhost:3000");
+});
+```
+
+</Step>
+<Step>
+
+#### 在 Hub 中注册并安装
+
+1. 在 Hub 控制台创建一个新 App，填写名称、描述
+2. 声明所需权限：`messages:send`、`bot:read`
+3. 订阅事件：`message.received`
+4. 将 App 安装到你的 Bot，获取 `app_token` 和 `signing_secret`
+5. 在 App 设置中填写 `request_url`（即你的服务地址，如 `http://your-server:3000/events/openilink`）
+6. 安装完成后，Hub 会把 Bot 收到的消息推送到你的 App
+
+</Step>
+</Steps>
+
+<Callout type="warn">
+`app_token` 和 `signing_secret` 仅在安装时显示一次，请务必妥善保存。如果丢失，需要重新生成。
+</Callout>
+
+**进阶：OAuth PKCE 流程**
+
+如果你的 App 需要用户主动授权（比如访问用户的其他 Bot），可以使用 OAuth 授权码 + PKCE 流程：
+
+1. 引导用户跳转到 Hub 授权页面
+2. 用户确认授权后，Hub 回调你的 App 并携带授权码
+3. App 用授权码换取 `access_token`
+4. 使用 `access_token` 调用授权范围内的 API
+
+完整的 App 开发文档请参考 [App 开发](/docs/hub/apps)。
+
+---
+
+## 案例五：对接 OpenClaw AI Agent 框架
+
+**场景**：你正在使用 [OpenClaw](https://github.com/nicepkg/openclaw) AI Agent 框架开发智能体，希望将微信作为智能体的输入/输出渠道。
+
+### 什么是 OpenClaw
+
+OpenClaw 是一个开源的 AI Agent 框架，支持通过插件系统对接各种消息渠道。OpeniLink 官方提供了 `openclaw-channel-openilink` 插件，让 OpenClaw 智能体可以直接收发微信消息。
+
+简单来说：**OpenClaw 负责 AI 智能体的逻辑，OpeniLink 负责微信消息的收发，两者通过插件连接。**
+
+### 接入步骤
+
+<Steps>
+<Step>
+
+#### 确保已部署 Hub
+
+参考 [快速开始](/docs/guide/quick-start) 完成 Hub 的部署和微信 Bot 绑定。
+
+</Step>
+<Step>
+
+#### 安装 OpenClaw 渠道插件
+
+在你的 OpenClaw 项目中，安装 OpeniLink 渠道插件：
+
+```bash
+openclaw plugins install @openilink/openclaw-channel
+```
+
+</Step>
+<Step>
+
+#### 配置渠道连接
+
+在 OpenClaw 的配置文件中，添加 OpeniLink 渠道的连接信息：
+
+```yaml
+channels:
+  - type: openilink
+    hub_url: http://localhost:9800
+    api_key: your-channel-api-key
+```
+
+这里的 `api_key` 是你在 Hub 控制台创建 Channel 后获得的 API Key。
+
+</Step>
+<Step>
+
+#### 启动 OpenClaw Agent
+
+配置完成后，启动 OpenClaw Agent。此时，用户通过微信发给 Bot 的消息会自动路由到 OpenClaw 智能体处理，智能体的回复也会通过 OpeniLink 发回给用户。
+
+</Step>
+</Steps>
+
+<Callout type="info">
+`openclaw-channel-openilink` 插件的源码和详细配置说明请参考 [openclaw-channel-openilink](https://github.com/openilink/openclaw-channel-openilink) 仓库。
+</Callout>
+
+---
+
+## 总结
+
+| 使用场景 | 核心能力 | 推荐阅读 |
+| --- | --- | --- |
+| 消息转发到其他平台 | Webhook + openilink-tg | [Webhook 与插件](/docs/hub/webhook) |
+| AI 自动客服 | AI 自动回复 | [AI 自动回复](/docs/hub/ai-reply) |
+| SDK 自定义开发 | 多语言 SDK | [SDK 总览](/docs/sdk) |
+| Hub App 扩展 | App + Bot API | [App 开发](/docs/hub/apps) |
+| 对接 OpenClaw | 渠道插件 | [仓库索引](/docs/repositories) |
+
+如果你有任何问题，欢迎加入 [社区](/docs/community) 交流。

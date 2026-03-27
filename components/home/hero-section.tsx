@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowRight, Check, Copy, ExternalLink } from 'lucide-react';
-import { SiGo, SiReact, SiPostgresql, SiDocker, SiTypescript, SiPython, SiNodedotjs, SiPhp } from 'react-icons/si';
+import { SiGo, SiReact, SiSqlite, SiDocker, SiTypescript, SiPython, SiNodedotjs, SiPhp } from 'react-icons/si';
 import { ParticleEffect } from './particle-effect';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { HyperText } from '@/components/ui/hyper-text';
@@ -17,7 +17,7 @@ const stats = [
 const techStack = [
   { name: 'Go', icon: SiGo },
   { name: 'React', icon: SiReact },
-  { name: 'PostgreSQL', icon: SiPostgresql },
+  { name: 'SQLite', icon: SiSqlite },
   { name: 'Docker', icon: SiDocker },
   { name: 'TypeScript', icon: SiTypescript },
   { name: 'Python', icon: SiPython },
@@ -27,7 +27,7 @@ const techStack = [
 
 export function HeroSection() {
   const [copied, setCopied] = useState(false);
-  const command = 'docker compose up -d';
+  const command = 'curl -fsSL https://raw.githubusercontent.com/openilink/openilink-hub/main/install.sh | sh';
 
   const handleCopy = async () => {
     try {
@@ -91,10 +91,10 @@ export function HeroSection() {
 
         {/* 描述 */}
         <p className="mb-4 max-w-2xl text-sm leading-relaxed text-neutral-500 md:text-base">
-          扫码绑定微信号，消息实时转发到你的服务。支持 WebSocket、Webhook、AI 自动回复三通道并行。
+          一行命令安装，零依赖，内置 SQLite 零配置启动。支持 WebSocket、Webhook、AI 自动回复三通道并行。
         </p>
         <div className="mb-10 flex flex-wrap gap-3">
-          {['多 Bot 管理', 'JS 插件引擎', '7 种语言 SDK', 'Passkey 登录'].map((tag) => (
+          {['一键安装', '应用市场', '自动续期', '消息追踪', '7 种语言 SDK'].map((tag) => (
             <span key={tag} className="rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1 font-mono text-xs text-neutral-400">
               {tag}
             </span>

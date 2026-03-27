@@ -10,6 +10,8 @@ import {
   Bot,
   Webhook,
   Cpu,
+  Store,
+  Activity,
 } from 'lucide-react';
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
 import { AnimatedBeam } from '@/components/ui/animated-beam';
@@ -93,18 +95,32 @@ const features = [
     className: 'md:col-span-2 lg:col-span-2',
   },
   {
-    Icon: QrCode,
-    name: '多 Bot 集中管理',
-    description: '扫码绑定微信号，统一面板管理所有 Bot，实时监控状态。',
-    href: '/docs',
+    Icon: Store,
+    name: '应用市场',
+    description: '内置 Bridge、OpenClaw 等应用，一键安装扩展 Bot 能力。支持第三方 App 开发与上架。',
+    href: '/docs/hub/apps',
     cta: '了解更多',
     background: (
-      <img
-        src="/images/hub-1.png"
-        alt="Hub 管理面板"
-        className="absolute inset-0 h-full w-full object-cover opacity-40 transition-all duration-500 group-hover:scale-105 group-hover:opacity-60"
-        loading="lazy"
-      />
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="w-full max-w-xs space-y-2">
+          {[
+            { icon: '🔗', name: 'Bridge', desc: '双向桥接 Bot 与外部系统', tag: '内置' },
+            { icon: '🦞', name: 'OpenClaw', desc: '通过 OpenClaw 协议接入', tag: '内置' },
+            { icon: '⚡', name: 'Command Service', desc: '动态命令服务', tag: 'v1.0.0' },
+          ].map((app) => (
+            <div key={app.name} className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-950/80 px-3 py-2">
+              <span className="text-lg">{app.icon}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-neutral-300">{app.name}</span>
+                  <span className="rounded bg-[#07C160]/10 px-1.5 py-0.5 font-mono text-[9px] text-[#07C160]">{app.tag}</span>
+                </div>
+                <span className="font-mono text-[10px] text-neutral-600">{app.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     ),
     className: '',
   },
@@ -182,6 +198,43 @@ const features = [
     className: '',
   },
   {
+    Icon: Activity,
+    name: '消息链路追踪',
+    description: '完整的消息追踪时间线，从接收到投递每一步清晰可见，快速定位问题。',
+    href: '/docs/hub/tracing',
+    cta: '了解更多',
+    background: (
+      <div className="flex h-full items-center justify-center p-4">
+        <div className="w-full max-w-xs rounded-lg border border-neutral-800 bg-neutral-950/80 p-3">
+          <div className="mb-2 font-mono text-[10px] text-neutral-600">Trace Timeline</div>
+          <div className="space-y-1.5">
+            {[
+              { name: 'process_message', width: '65%', time: '2.86s' },
+              { name: 'store', width: '5%', time: '<1ms' },
+              { name: 'POST command-se...', width: '48%', time: '2.10s', offset: '17%' },
+              { name: 'send_reply', width: '12%', time: '', offset: '52%' },
+              { name: 'Bot API send_reply', width: '8%', time: '', offset: '85%' },
+            ].map((span) => (
+              <div key={span.name} className="flex items-center gap-2">
+                <span className="w-28 shrink-0 truncate text-right font-mono text-[9px] text-neutral-500">{span.name}</span>
+                <div className="relative h-3 flex-1 rounded-sm bg-neutral-900">
+                  <div
+                    className="absolute top-0 h-full rounded-sm bg-[#07C160]/30"
+                    style={{ width: span.width, left: span.offset || '0%' }}
+                  />
+                  {span.time && (
+                    <span className="absolute top-0 left-1 font-mono text-[8px] leading-3 text-neutral-400" style={{ left: span.offset || '2px' }}>{span.time}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+    className: '',
+  },
+  {
     Icon: MessageCircle,
     name: '微信 ClawBot 对话',
     description: 'AI 自动回复无缝集成，在真实微信对话中即时响应。',
@@ -205,8 +258,9 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Section 标题 */}
         <FadeIn className="mb-12">
-          <span className="mb-4 inline-block font-mono text-xs uppercase tracking-wider text-[#07C160]">
+          <span className="mb-4 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[#07C160]">
             消息管理平台
+            <span className="rounded-full bg-[#D86A33]/20 px-2 py-0.5 text-[10px] font-bold text-[#D86A33]">NEW: 应用市场 · 消息追踪 · 自动续期</span>
           </span>
           <HyperText
             as="h2"
@@ -219,7 +273,7 @@ export function FeaturesSection() {
           </HyperText>
           <p className="max-w-2xl text-neutral-500">
             从扫码绑定到消息分发，OpeniLink Hub
-            提供完整的管理面板和多通道消息路由。
+            提供完整的管理面板、应用市场、消息链路追踪和多通道消息路由。
           </p>
         </FadeIn>
 

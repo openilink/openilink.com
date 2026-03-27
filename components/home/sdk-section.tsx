@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, Puzzle, Container, ExternalLink } from 'lucide-react';
+import { KeyRound, Puzzle, Download, ExternalLink } from 'lucide-react';
 import { SiGo, SiNodedotjs, SiPython, SiPhp } from 'react-icons/si';
 import { HyperText } from '@/components/ui/hyper-text';
 import { FadeIn } from '@/components/ui/fade-in';
@@ -57,9 +57,9 @@ const bonusFeatures = [
     color: '#D86A33',
   },
   {
-    icon: Container,
-    title: 'Docker 一键部署',
-    desc: 'docker compose up -d 即可启动，首个注册用户自动成为管理员。',
+    icon: Download,
+    title: '一键安装，零依赖',
+    desc: 'curl 一行命令安装，内置 SQLite 零配置启动。支持二进制、Docker、系统服务多种部署方式。',
     color: '#07C160',
   },
 ];

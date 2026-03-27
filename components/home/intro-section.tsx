@@ -19,15 +19,17 @@ const steps = [
   {
     step: '03',
     title: 'Hub 包装一切',
-    desc: 'OpeniLink Hub 把 iLink 的原始能力包装成完整平台：扫码绑定、多通道分发、AI 回复、插件引擎，开箱即用。',
+    desc: 'OpeniLink Hub 把 iLink 的原始能力包装成完整平台：一键安装零依赖、应用市场一键扩展、自动续期防掉线、消息链路追踪、AI 回复，开箱即用。',
   },
 ];
 
 const comparisons = [
-  { feature: '部署方式', hub: 'docker compose up -d', traditional: '复杂依赖配置' },
+  { feature: '部署方式', hub: '一行命令安装，零依赖', traditional: '需要复杂的依赖配置' },
+  { feature: '数据库', hub: '内置 SQLite（零配置）+ 可选 PostgreSQL', traditional: '必须配置外部数据库' },
   { feature: '多 Bot 管理', hub: '扫码绑定，集中管理', traditional: '通常只支持单个' },
   { feature: '消息下发', hub: 'WebSocket + Webhook + AI 并行', traditional: '单一通道' },
-  { feature: '可扩展性', hub: 'JS 插件 + 7 种 SDK', traditional: '硬编码' },
+  { feature: '会话续期', hub: '自动续期，避免 24h 窗口过期掉线', traditional: '手动处理或无法续期' },
+  { feature: '可扩展性', hub: 'JS 插件 + 应用市场 + 7 种 SDK', traditional: '硬编码' },
   { feature: '开源协议', hub: 'MIT，无商业限制', traditional: '部分闭源' },
 ];
 
