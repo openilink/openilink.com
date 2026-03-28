@@ -103,7 +103,7 @@ export function HeroSection() {
 
         {/* 按钮组 */}
         <div className="mb-8 flex flex-wrap items-center gap-4">
-          <Link href="/docs">
+          <Link href="https://hub.openilink.com" target="_blank" rel="noopener noreferrer">
             <ShimmerButton
               shimmerColor="#07C160"
               background="rgba(7, 193, 96, 0.9)"
@@ -111,7 +111,7 @@ export function HeroSection() {
               className="px-8 py-4 font-mono text-sm font-bold uppercase tracking-wider"
             >
               <ArrowRight className="mr-2 h-4 w-4" />
-              立即部署
+              在线体验
             </ShimmerButton>
           </Link>
           <Link
