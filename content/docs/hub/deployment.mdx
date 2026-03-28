@@ -31,7 +31,7 @@ oih
 | 操作系统 | 架构 | 支持情况 |
 | --- | --- | --- |
 | Linux | amd64 | ✅ 支持 |
-| Linux | arm64 | ⚠️ 暂不支持二进制，推荐使用 Docker |
+| Linux | arm64 | ✅ 支持 |
 | macOS | amd64 (Intel) | ✅ 支持 |
 | macOS | arm64 (Apple Silicon) | ✅ 支持 |
 
@@ -90,7 +90,7 @@ docker run -d \
 docker run -d \
   --name openilink-hub \
   -p 9800:9800 \
-  -v openilink_data:/data \
+  -v openilink_data:/var/lib/openilink-hub \
   ghcr.io/openilink/openilink-hub:latest
 ```
 
@@ -121,19 +121,22 @@ Docker Compose 配置包含三个服务：
 ```yaml
 # 数据库服务
 postgres:
-  image: postgres:17
-  ports:
-    - "15432:5432"
+  image: postgres:17-alpine
   environment:
     POSTGRES_USER: openilink
-    POSTGRES_PASSWORD: openilink
+    POSTGRES_PASSWORD: ${PASSWORD:-openilink}
     POSTGRES_DB: openilink
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U openilink -d openilink"]
+    interval: 5s
+    timeout: 5s
+    retries: 10
   volumes:
-    - postgres_data:/var/lib/postgresql/data
+    - pgdata:/var/lib/postgresql/data
 ```
 
-- 端口映射：宿主机 `15432` → 容器 `5432`
-- 默认用户名/密码：`openilink` / `openilink`
+- 默认不暴露端口到宿主机，需要时可通过 `docker compose exec postgres psql -U openilink` 连接
+- 默认用户名/密码：`openilink` / `openilink`（可通过 `PASSWORD` 环境变量统一修改）
 - 数据持久化到 Docker Volume
 
 #### 2. MinIO 对象存储
@@ -142,42 +145,39 @@ postgres:
 # 对象存储服务
 minio:
   image: minio/minio
-  ports:
-    - "19000:9000"   # API 端口
-    - "19001:9001"   # 控制台端口
+  command: server /data --console-address ":9001"
   environment:
     MINIO_ROOT_USER: openilink
-    MINIO_ROOT_PASSWORD: openilink
-  command: server /data --console-address ":9001"
+    MINIO_ROOT_PASSWORD: ${PASSWORD:-openilink}
   volumes:
-    - minio_data:/data
+    - miniodata:/data
 ```
 
-- API 端口：`19000`，用于文件上传和下载
-- 控制台端口：`19001`，可通过浏览器管理存储桶
-- 默认用户名/密码：`openilink` / `openilink`
+- 默认不暴露端口到宿主机，Hub 通过内部网络 `minio:9000` 访问
+- 默认用户名/密码：`openilink` / `openilink`（可通过 `PASSWORD` 环境变量统一修改）
 
 #### 3. OpeniLink Hub
 
 ```yaml
 # Hub 主服务
 hub:
-  image: openilink/openilink-hub
+  build: .
+  restart: on-failure
   ports:
-    - "9800:9800"
+    - "${HUB_PORT:-9800}:9800"
   environment:
-    LISTEN: ":9800"
-    DATABASE_URL: "postgres://openilink:openilink@postgres:5432/openilink?sslmode=disable"
-    SECRET: "change-me-in-production"
-    STORAGE_ENDPOINT: "minio:9000"
-    STORAGE_ACCESS_KEY: "openilink"
-    STORAGE_SECRET_KEY: "openilink"
-    STORAGE_BUCKET: "openilink"
-    RP_ORIGIN: "http://localhost:9800"
-    RP_ID: "localhost"
+    DATABASE_URL: postgres://openilink:${PASSWORD:-openilink}@postgres:5432/openilink?sslmode=disable
+    RP_ORIGIN: ${RP_ORIGIN:-http://localhost:${HUB_PORT:-9800}}
+    RP_ID: ${RP_ID:-localhost}
+    STORAGE_ENDPOINT: minio:9000
+    STORAGE_ACCESS_KEY: openilink
+    STORAGE_SECRET_KEY: ${PASSWORD:-openilink}
+    STORAGE_BUCKET: openilink
   depends_on:
-    - postgres
-    - minio
+    postgres:
+      condition: service_healthy
+    minio:
+      condition: service_started
 ```
 
 ## 从源码构建
@@ -189,15 +189,15 @@ hub:
 git clone https://github.com/openilink/openilink-hub.git
 cd openilink-hub
 
-# 构建（需要 Go 1.22+）
-go build -o oih ./cmd/oih
+# 构建（需要 Go 1.25+）
+go build -o oih .
 
 # 运行
 ./oih
 ```
 
 <Callout type="warn">
-从源码构建需要安装 Go 1.22 或更高版本。请确保 `GOPATH` 和 `GOBIN` 已正确配置。
+从源码构建需要安装 Go 1.25 或更高版本。请确保 `GOPATH` 和 `GOBIN` 已正确配置。
 </Callout>
 
 ## CLI 命令
