@@ -126,9 +126,9 @@ export function HeroSection() {
         </div>
 
         {/* 命令框 */}
-        <div className="mb-12 flex w-full max-w-md items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-950/80 px-4 py-3 font-mono text-sm backdrop-blur">
-          <span className="text-neutral-600">$</span>
-          <span className="flex-1 text-neutral-400">{command}</span>
+        <div className="mb-12 flex w-full max-w-2xl items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-950/80 px-4 py-3 font-mono text-sm backdrop-blur">
+          <span className="shrink-0 text-neutral-600">$</span>
+          <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-neutral-400 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">{command}</span>
           <button
             onClick={handleCopy}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-neutral-600 transition-colors hover:text-neutral-300"
