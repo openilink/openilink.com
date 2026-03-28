@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowRight, Check, Copy, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Check, Copy, Star } from 'lucide-react';
 import { SiGo, SiReact, SiSqlite, SiDocker, SiTypescript, SiPython, SiNodedotjs, SiPhp } from 'react-icons/si';
 import { ParticleEffect } from './particle-effect';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
@@ -27,7 +27,19 @@ const techStack = [
 
 export function HeroSection() {
   const [copied, setCopied] = useState(false);
+  const [stars, setStars] = useState<number | null>(null);
   const command = 'curl -fsSL https://raw.githubusercontent.com/openilink/openilink-hub/main/install.sh | sh';
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/openilink/openilink-hub')
+      .then(res => res.json())
+      .then(data => {
+        if (typeof data.stargazers_count === 'number') {
+          setStars(data.stargazers_count);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCopy = async () => {
     try {
@@ -120,8 +132,13 @@ export function HeroSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-900/80 px-8 py-4 font-mono text-sm font-bold uppercase tracking-wider text-neutral-300 backdrop-blur transition-colors hover:border-neutral-600 hover:bg-neutral-800"
           >
-            <ExternalLink className="h-4 w-4" />
+            <Star className="h-4 w-4" />
             GitHub
+            {stars !== null && (
+              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                {stars}
+              </span>
+            )}
           </Link>
         </div>
 
